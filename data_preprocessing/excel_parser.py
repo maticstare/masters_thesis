@@ -27,11 +27,10 @@ def _get_total_number_of_points(data):
     return count
 
 
-def prepare_data(data):
+def prepare_data(data, space_out_factor):
     curve_function = lambda z: 1000 * np.cos(z / 5)#lambda z: -np.log(z+1)*300
     # Prepare the tunnel pointcloud
     N = _get_total_number_of_points(data)
-    space_out_factor = 1000
     points = np.zeros((N, 3))
     min_key = min(data.keys())
     index = 0
