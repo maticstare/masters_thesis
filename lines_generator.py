@@ -1,36 +1,40 @@
 import numpy as np
 import pyvista as pv
-from tunnel_generator import TunnelPointCloudGenerator
+from data_preprocessing.excel_parser import *
 from scipy.interpolate import splprep, splev
 pv.global_theme.allow_empty_mesh = True
 
 class TunnelSlicer:
-    def __init__(self, tunnel_points: np.ndarray, n_horizontal_slices: int, n_vertical_slices: int):
+    def __init__(self, tunnel_points: np.ndarray, control_points: np.ndarray, n_horizontal_slices: int):
         """Initialize the slicer with tunnel points and number of horizontal and vertical slices."""
         self.tunnel_points = tunnel_points
+        self.control_points = control_points
         
         self.n_horizontal_slices = n_horizontal_slices
-        self.n_vertical_slices = n_vertical_slices
+        self.n_vertical_slices = len(control_points)
+        #print(self.n_vertical_slices)
 
         self.tunnel_width = np.ptp(self.tunnel_points[:, 0])
-        self.tunnel_height = np.ptp(self.tunnel_points[:, 1])
+        #self.tunnel_height = np.ptp(self.tunnel_points[1e5:-1e5, 1])
+        self.tunnel_height = 5000.0
         self.tunnel_length = np.ptp(self.tunnel_points[:, 2])
-
+        
         self.width_offset = min(self.tunnel_points[:, 0])
         self.height_offset = max(self.tunnel_points[:, 1])
         self.length_offset = min(self.tunnel_points[:, 2])
 
-        self.hslice_planes = np.linspace(1, self.tunnel_height-1, n_horizontal_slices)
+        self.hslice_planes = np.linspace(500, self.tunnel_height-1, n_horizontal_slices)
         # Since there is a curvature in the tunnel, I will skip a few starting and ending points
-        self.vslice_planes = np.linspace(0+3, self.tunnel_length-2, n_vertical_slices)
+        self.vslice_planes = np.linspace(0+3, self.tunnel_length-2, self.n_vertical_slices)
 
-        self.tunnel_vertical_hyperplane_points = np.zeros((n_vertical_slices, 3))
+        self.tunnel_vertical_hyperplane_points = control_points
+        self.tck = None
         self.tunnel_vertical_hyperplane = None
 
         self.plotter = pv.Plotter()
         
 
-    def _find_points_near_plane(self, point_cloud: np.ndarray, plane: pv.Plane, epsilon=0.1) -> np.ndarray:
+    def _find_points_near_plane(self, point_cloud: np.ndarray, plane: pv.Plane, epsilon=5) -> np.ndarray:
         """
         Finds the points from the point cloud that are within epsilon distance from the plane.
 
@@ -55,6 +59,7 @@ class TunnelSlicer:
 
         # Filter the points within epsilon distance from the plane
         close_points = point_cloud[distances <= epsilon]
+        
         return close_points
 
 
@@ -74,7 +79,7 @@ class TunnelSlicer:
         """Slice the tunnel horizontally at a given y value."""
         return pv.Plane(
                 center=(self.tunnel_points[:, 0].mean(),
-                        -y_value,
+                        y_value,
                         self.tunnel_points[:, 2].mean()),
                 direction=(0, 1, 0),
                 i_size=self.tunnel_length,
@@ -82,7 +87,7 @@ class TunnelSlicer:
             )
 
 
-    def _find_control_points_of_center_tunnel_line(self, visualize=False):
+    '''def _find_control_points_of_center_tunnel_line(self, visualize=False):
         """Find the control points of the center tunnel line for B-spline fitting."""
         for i, z_value in enumerate(self.vslice_planes):
             plane = self._slice_the_tunnel_vertically(z_value)
@@ -98,13 +103,14 @@ class TunnelSlicer:
             self.tunnel_vertical_hyperplane_points[i] = [
                 np.mean(sliced_points[:, 0]),
                 -self.tunnel_height/2 + self.height_offset,
-                z_value + self.length_offset]
+                z_value + self.length_offset]'''
 
 
     def _find_b_spline_of_center_tunnel_line(self):
         """Fit a B-spline to the center tunnel line."""
 
         tck, _ = splprep(self.tunnel_vertical_hyperplane_points.T, s=0)
+        self.tck = tck
         self.tunnel_vertical_hyperplane = np.column_stack((splev(np.linspace(0, 1, 100), tck)))
   
 
@@ -138,9 +144,21 @@ class TunnelSlicer:
         
         return cross_product[2] <= 0
 
+    def _curve_points(self, tck) -> np.ndarray:
+        """Curve the tunnel points around the center line."""            
+        curved_points = []
+        for point in self.tunnel_points:
+            x, y, z = point
+            dx, _, dz = splev(z, tck, der=1)
+            theta = np.arctan2(dz, dx)
+            new_x = x * np.cos(theta) + z * np.sin(theta)
+            new_z = -x * np.sin(theta) + z * np.cos(theta)
+            curved_points.append([new_x, y, new_z])
+        self.tunnel_points = np.array(curved_points)
+        #return np.array(curved_points)
 
     def _filter_fit_visualize(self, left_wall, right_wall, plane, points_near_plane):
-        """ # Fit a b-spline to the left wall
+        # Fit a b-spline to the left wall
             tck_left, _ = splprep(left_wall.T, s=0)
             left_wall = np.column_stack((splev(np.linspace(0, 1, 100), tck_left)))
 
@@ -150,19 +168,21 @@ class TunnelSlicer:
 
             #Plot the fitted B-spline curve as a line
             self.plotter.add_lines(left_wall, color="blue", width=3, label="Left Wall")
-            self.plotter.add_lines(right_wall, color="red", width=3, label="Right Wall") """
-        pass
+            self.plotter.add_lines(right_wall, color="red", width=3, label="Right Wall")
+        #pass
 
 
     def visualize(self):
         """Visualize the generated point cloud using PyVista."""
-        self.plotter.add_points(self.tunnel_points, color="lightblue", point_size=2, label="Tunnel")
-        
-        # Find the control points of the center tunnel line for B-spline fitting
-        self._find_control_points_of_center_tunnel_line(visualize=False)
-        
+                
         # Fit a B-spline to the center tunnel line
         self._find_b_spline_of_center_tunnel_line()
+        
+        # Curve the tunnel points around the center line (TODO: not working)
+        #self._curve_points(self.tck)
+
+        # Add the tunnel points to the plot
+        self.plotter.add_points(self.tunnel_points, color="lightblue", point_size=2, label="Tunnel")
 
         # Add control points to the plot
         self.plotter.add_points(self.tunnel_vertical_hyperplane_points, color="red", point_size=5, label="Control Points")
@@ -189,24 +209,38 @@ class TunnelSlicer:
             left_wall = np.array(left_wall)
             right_wall = np.array(right_wall)
 
+            if len(left_wall) == 0 or len(right_wall) == 0:
+                continue
+
             # TODO: Filter the points, fit a B-spline, and visualize the left and right walls at each horizontal slice
             self._filter_fit_visualize(left_wall, right_wall, plane, points_near_plane)
             
             # Visualize the left and right walls
-            self.plotter.add_points(left_wall, color="blue", point_size=5)
-            self.plotter.add_points(right_wall, color="red", point_size=5)
+            #self.plotter.add_points(left_wall, color="blue", point_size=5)
+            #self.plotter.add_points(right_wall, color="red", point_size=5)
 
             # Visualize the plane
-            self.plotter.add_mesh(plane, color=pv.Color("red"), opacity=0.3)
+            #self.plotter.add_mesh(plane, color=pv.Color("red"), opacity=0.3)
+            
+            #self.plotter.add_points(points_near_plane, color="blue", point_size=5)
 
         self.plotter.add_legend()
         self.plotter.show_axes()
         self.plotter.show()
 
 if __name__ == "__main__":
-    curve_function = lambda z: 0.35 * np.cos(z / 5)
-    generator = TunnelPointCloudGenerator(curve_function=curve_function, tunnel_length=20)
-    point_cloud, _, _, _, _ = generator.generate_pointcloud()
 
-    slicer = TunnelSlicer(point_cloud, n_vertical_slices=10, n_horizontal_slices=10)
-    slicer.visualize()
+    """ curve_function = lambda z: 0.35 * np.cos(z / 5)
+    pointcloud = TunnelPointCloudGenerator(curve_function=curve_function)
+    pointcloud.visualize()
+    """
+
+    data = parse_excel("C:/Users/matic/Downloads/masters_thesis/data/Predor Ringo 511869.90-511746.75.xlsx", 0)
+
+
+    points, control_points = prepare_data(data)
+
+
+    tunnel_slicer = TunnelSlicer(points, control_points, n_horizontal_slices=10)
+
+    tunnel_slicer.visualize()
