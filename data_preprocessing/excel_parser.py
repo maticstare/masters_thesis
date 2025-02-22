@@ -1,55 +1,45 @@
 import pandas as pd
 import numpy as np
 
-def parse_excel(file_path, sheet_name=0):
+def parse_excel_to_points_dict(file_path, sheet_name=0):
     data = pd.read_excel(file_path, sheet_name=sheet_name)
 
     dict = {}
 
+    min_distance = 511746.5
+    space_out_factor = 1000
+
     for i in range(0, len(data.columns)-2, 2):
         column_name = data.columns[i]
-        distance = data[column_name].iloc[0]
+        distance = data[column_name].iloc[0] - min_distance
         X = data.iloc[2:, i].dropna().astype(int)
         Y = data.iloc[2:, i+1].dropna().astype(int)
+        Z = pd.Series(np.ones(len(X))*distance*space_out_factor)
 
         dict[distance] = {
             "X": X,
-            "Y": Y
+            "Y": Y,
+            "Z": Z
         }
+    
+    # Curve X
+    curve_function = lambda z: 1000 * np.cos(z / 5)#lambda z: z**2
+    for j,key in enumerate(dict.keys()):
+        X = dict[key]["X"]
+        for i in range(len(X)):
+            X.iloc[i] += curve_function(j)    
+
     return dict
 
 
-def _get_total_number_of_points(data):
-    count = 0
-    for key in data.keys():
-        X = data[key]["X"]
-        count += len(X)
-    return count
-
-
-def prepare_data(data, space_out_factor):
-    curve_function = lambda z: 1000 * np.cos(z / 5)#lambda z: -np.log(z+1)*300
-    # Prepare the tunnel pointcloud
-    N = _get_total_number_of_points(data)
-    points = np.zeros((N, 3))
-    min_key = min(data.keys())
-    index = 0
-    for j, key in enumerate(data.keys()):
-        normalized_key = key - min_key
-        X = data[key]["X"]
-        Y = data[key]["Y"]
-        for i in range(len(X)):
-            points[i+index] = np.array([
-                X.iloc[i],#+curve_function(j),
-                Y.iloc[i],
-                normalized_key*space_out_factor
-            ])
-        index += len(X)
-    
-    # Prepare the control points
+def prepare_control_points(data: dict, space_out_factor: int, curve_function: callable = None):
     control_points = np.zeros((len(data.keys()), 3))
+    min_key = min(data.keys())
     for i, key in enumerate(data.keys()):
         normalized_key = key - min_key
         control_points[i, 2] = normalized_key*space_out_factor
-        #control_points[i, 0] = curve_function(i) # curve the control points
-    return points, control_points #np.fromiter(data.keys(), dtype=float)*space_out_factor
+        control_points[i, 0] = curve_function(i) if curve_function else 0
+    return control_points
+
+
+#curve_function = lambda z: 1000 * np.cos(z / 5)#lambda z: -np.log(z+1)*300
