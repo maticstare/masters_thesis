@@ -1,7 +1,6 @@
 import numpy as np
 import pyvista as pv
 from data_preprocessing.excel_parser import *
-#from rotate_points import *
 from scipy.interpolate import splprep, splev
 pv.global_theme.allow_empty_mesh = True
 
@@ -9,16 +8,16 @@ class TunnelSlicer:
     def __init__(self, points_dict: dict, control_points: np.ndarray, n_horizontal_slices: int):
         """Initialize the TunnelSlicer object."""
         self.points_dict = points_dict
-        self.control_points = control_points
+        self.control_points = control_points.copy()
         self.tunnel_points = None
         self.plotter = pv.Plotter()
 
         # Shift the control points to the center of the tunnel
-        self.tunnel_center_line_points = control_points
-        self.tunnel_center_line_points[:, 0] += 1800
+        self.control_points_adjusted = control_points
+        self.control_points_adjusted[:, 0] += 1800
 
         self.tunnel_center_line_b_spline = None
-        self.tck = None
+        self._tck = None
 
         self.n_horizontal_slices = n_horizontal_slices
 
@@ -29,10 +28,21 @@ class TunnelSlicer:
     def _find_b_spline_of_center_tunnel_line(self):
         """Fit a B-spline to the center tunnel line."""
 
-        tck, _ = splprep(self.tunnel_center_line_points.T, s=0)
-        self.tck = tck
+        tck, _ = splprep(self.control_points_adjusted.T, s=0)
+        self._tck = tck
         self.tunnel_center_line_b_spline = np.column_stack((splev(np.linspace(0, 1, 100), tck)))
-  
+    
+    def _visualize_b_spline_line(self, points, color, width=3):
+        """Visualize the B-spline curve as a line."""
+
+        n_points = points.shape[0]
+        
+        lines = np.hstack([[n_points] + list(range(n_points))]).astype(np.int32)
+        
+        polyline = pv.PolyData(points)
+        polyline.lines = lines
+        
+        self.plotter.add_mesh(polyline, color=color, line_width=width)
 
     def _fit_b_spline_to_walls(self, left_wall, right_wall, visualize):
         """Fit a B-spline to the left and right walls of the tunnel."""
@@ -46,8 +56,9 @@ class TunnelSlicer:
 
         if visualize:
             # Plot the fitted B-spline curve as a line
-            self.plotter.add_lines(left_wall, color="blue", width=3)
-            self.plotter.add_lines(right_wall, color="red", width=3)
+            self._visualize_b_spline_line(left_wall, color="blue", width=3)
+            self._visualize_b_spline_line(right_wall, color="red", width=3)
+
 
     def _classify_based_on_b_spline(self, point: np.ndarray) -> bool:
         """Classify the point as left or right wall based on the B-spline curve."""
@@ -56,7 +67,7 @@ class TunnelSlicer:
         px, _, pz = point
 
         # Project the curve points to the xz-plane
-        curve_xz = self.tunnel_center_line_points[:, [0, 2]]  # Only keep x and z coordinates
+        curve_xz = self.control_points_adjusted[:, [0, 2]]  # Only keep x and z coordinates
 
         # Find the closest point on the curve in the xz-plane
         distances = np.linalg.norm(curve_xz - np.array([px, pz]), axis=1)
@@ -187,11 +198,11 @@ class TunnelSlicer:
             # Find the tangent vector at the control point
             index = 247-int(key*2)
             if index == 0:
-                tangent = self.control_points[index+1] - self.control_points[index]
-            elif index == len(self.control_points) - 1:
-                tangent = self.control_points[index] - self.control_points[index-1]
+                tangent = self.control_points_adjusted[index+1] - self.control_points_adjusted[index]
+            elif index == len(self.control_points_adjusted) - 1:
+                tangent = self.control_points_adjusted[index] - self.control_points_adjusted[index-1]
             else:
-                tangent = self.control_points[index+1] - self.control_points[index-1]
+                tangent = self.control_points_adjusted[index+1] - self.control_points_adjusted[index-1]
             # Now transform the points at the key so they would be perpendicular to the tangent vector
             points = np.zeros((len(self.points_dict[key]["X"]), 3))
             for i in range(len(self.points_dict[key]["X"])):
@@ -200,7 +211,7 @@ class TunnelSlicer:
                     self.points_dict[key]["Y"].iloc[i],
                     self.points_dict[key]["Z"].iloc[i]
                 ])
-            rotated_points = self._rotate_points(points, np.array([0, 0, 1]), tangent, self.control_points[index])
+            rotated_points = self._rotate_points(points, np.array([0, 0, 1]), tangent, self.control_points_adjusted[index])
             self.points_dict[key]["X"] = pd.Series(rotated_points[:, 0])
             self.points_dict[key]["Y"] = pd.Series(rotated_points[:, 1])
             self.points_dict[key]["Z"] = pd.Series(rotated_points[:, 2])
@@ -211,11 +222,8 @@ class TunnelSlicer:
         # Curve the tunnel points around the center line
         self._curve_points()
 
-
         # prepare the points for rendering
         self.tunnel_points = self._prepare_points_for_rendering(self.points_dict)
-
-
 
 
     def visualize(self):
@@ -231,11 +239,8 @@ class TunnelSlicer:
         assert self.tunnel_points is not None, "Tunnel points are not initialized."
         self.plotter.add_points(self.tunnel_points, color="lightblue", point_size=2, label="Tunnel")
 
-        # Add control points to the plot
-        self.plotter.add_points(self.tunnel_center_line_points, color="red", point_size=5, label="Control Points")
-
         # Plot the fitted B-spline curve as a line
-        self.plotter.add_lines(self.tunnel_center_line_b_spline, color="green", width=3, label="Fitted Curve")
+        self._visualize_b_spline_line(self.tunnel_center_line_b_spline, color="green", width=3)
 
         # Generate splines (on walls) at different y values 
         self._generate_splines_at_y_values(epsilon=5, visualize=True)
@@ -245,10 +250,18 @@ class TunnelSlicer:
         self.plotter.show()
 
 if __name__ == "__main__":
+    """curve functions:
+    lambda z: z**2
+    lambda z: 1000 * np.cos(z / 5)
+    lambda z: -np.log(z+1)*300
+    """
 
-    points_dict = parse_excel_to_points_dict("data/Predor Ringo 511869.90-511746.75.xlsx", 0)
+    curve_function = lambda z: 1000 * np.cos(z / 5)
+    space_out_factor = 1000
 
-    control_points = prepare_control_points(points_dict, space_out_factor=1000, curve_function=lambda z: 1000 * np.cos(z / 5))#lambda z: z**2)
+    points_dict = parse_excel_to_points_dict("data/Predor Ringo 511869.90-511746.75.xlsx", 0, curve_function)
+
+    control_points = prepare_control_points(points_dict, space_out_factor, curve_function)
     
     tunnel_slicer = TunnelSlicer(points_dict, control_points, n_horizontal_slices=10)
 
