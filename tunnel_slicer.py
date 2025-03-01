@@ -1,16 +1,18 @@
 import numpy as np
 import pyvista as pv
+import pandas as pd
+import os
 from data_preprocessing.excel_parser import *
 from scipy.interpolate import splprep, splev
 pv.global_theme.allow_empty_mesh = True
 
 class TunnelSlicer:
-    def __init__(self, points_dict: dict, control_points: np.ndarray, n_horizontal_slices: int):
+    def __init__(self, points_dict: dict, control_points: np.ndarray, plotter: pv.Plotter, n_horizontal_slices: int):
         """Initialize the TunnelSlicer object."""
         self.points_dict = points_dict
         self.control_points = control_points.copy()
         self.tunnel_points = None
-        self.plotter = pv.Plotter()
+        self.plotter = plotter
 
         # Shift the control points to the center of the tunnel
         self.control_points_adjusted = control_points
@@ -225,44 +227,62 @@ class TunnelSlicer:
         # prepare the points for rendering
         self.tunnel_points = self._prepare_points_for_rendering(self.points_dict)
 
+    def save_to_parquet(self, filename="tunnel_pointcloud.parquet"):
+        """Save tunnel points to a Parquet file."""
+        assert self.tunnel_points is not None, "No tunnel points to save."
+        
+        # Create a DataFrame
+        df = pd.DataFrame(self.tunnel_points, columns=["X", "Y", "Z"])
+        
+        # Save to Parquet
+        df.to_parquet(filename, index=False)
 
-    def visualize(self):
-        """Visualize the generated point cloud using PyVista."""
-                
+    def load_from_parquet(self, filename="tunnel_pointcloud.parquet"):
+        """Load tunnel points from a Parquet file."""
+        df = pd.read_parquet(filename)
+        self.tunnel_points = df.to_numpy()
+
+    def visualize_the_tunnel(self):
+        """Visualize the tunnel, loading from cache if possible."""
+
         # Fit a B-spline to the center tunnel line
         self._find_b_spline_of_center_tunnel_line()
 
-        # Do all the necessary transformations of the tunnel points
-        self._transform_points()
+        # Load if Parquet file exists
+        if os.path.exists("data/tunnel_pointcloud.parquet"):
+            self.load_from_parquet("data/tunnel_pointcloud.parquet")
+        else:
+            self._transform_points()
+            self.save_to_parquet("data/tunnel_pointcloud.parquet")
 
-        # Add the tunnel points to the plot
-        assert self.tunnel_points is not None, "Tunnel points are not initialized."
+        # Add points to plot
         self.plotter.add_points(self.tunnel_points, color="lightblue", point_size=2, label="Tunnel")
-
+        
         # Plot the fitted B-spline curve as a line
         self._visualize_b_spline_line(self.tunnel_center_line_b_spline, color="green", width=3)
-
+        
         # Generate splines (on walls) at different y values 
         self._generate_splines_at_y_values(epsilon=5, visualize=True)
 
-        self.plotter.add_legend()
-        self.plotter.show_axes()
-        self.plotter.show()
 
 if __name__ == "__main__":
     """curve functions:
+    lambda z: z
     lambda z: z**2
     lambda z: 1000 * np.cos(z / 5)
     lambda z: -np.log(z+1)*300
     """
 
-    curve_function = lambda z: 1000 * np.cos(z / 5)
+    curve_function = lambda z: z
     space_out_factor = 1000
 
-    points_dict = parse_excel_to_points_dict("data/Predor Ringo 511869.90-511746.75.xlsx", 0, curve_function)
-
+    points_dict = efficient_data_loading("data/Predor Ringo 511869.90-511746.75.xlsx", 0, curve_function, space_out_factor)
     control_points = prepare_control_points(points_dict, space_out_factor, curve_function)
-    
-    tunnel_slicer = TunnelSlicer(points_dict, control_points, n_horizontal_slices=10)
+    tunnel_slicer = TunnelSlicer(points_dict, control_points, pv.Plotter(), n_horizontal_slices=10)
+    tunnel_slicer.visualize_the_tunnel()
 
-    tunnel_slicer.visualize()
+    tunnel_slicer.plotter.add_legend()
+    tunnel_slicer.plotter.show_axes()
+    tunnel_slicer.plotter.camera.up = (0, 1, 0)
+    tunnel_slicer.plotter.camera.zoom(1.5)
+    tunnel_slicer.plotter.show()

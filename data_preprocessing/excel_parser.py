@@ -35,3 +35,32 @@ def prepare_control_points(data: dict, space_out_factor: int, curve_function: ca
         control_points[i, 2] = normalized_key*space_out_factor
         control_points[i, 0] = curve_function(i) if curve_function else 0
     return control_points
+
+def parse_to_parquet(file_path: str, sheet_name=0, curve_function=None, space_out_factor=1000):
+    data = parse_excel_to_points_dict(file_path, sheet_name, curve_function, space_out_factor)
+    rows = []
+    for distance, coords in data.items():
+        for i in range(len(coords["X"])):
+            rows.append((distance, coords["X"].iloc[i], coords["Y"].iloc[i], coords["Z"].iloc[i]))
+    df = pd.DataFrame(rows, columns=["distance", "X", "Y", "Z"])
+    
+    df.to_parquet(file_path.replace(".xlsx", ".parquet"), engine="pyarrow", compression="snappy")
+
+
+def read_parquet(file_path):
+    df_loaded = pd.read_parquet(file_path)
+    data = {}
+    for distance in df_loaded["distance"].unique():
+        data[distance] = {
+            "X": df_loaded[df_loaded["distance"] == distance]["X"],
+            "Y": df_loaded[df_loaded["distance"] == distance]["Y"],
+            "Z": df_loaded[df_loaded["distance"] == distance]["Z"]
+        }
+    return data
+
+def efficient_data_loading(file_path: str, sheet_name=0, curve_function=None, space_out_factor=1000):
+    try:
+        return read_parquet(file_path.replace(".xlsx", ".parquet"))
+    except:
+        parse_to_parquet(file_path, sheet_name, curve_function, space_out_factor)
+        return read_parquet(file_path.replace(".xlsx", ".parquet"))
