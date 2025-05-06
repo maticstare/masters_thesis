@@ -7,7 +7,7 @@ from scipy.interpolate import splprep, splev
 pv.global_theme.allow_empty_mesh = True
 
 class TunnelSlicer:
-    def __init__(self, points_dict: dict, control_points: np.ndarray, plotter: pv.Plotter, n_horizontal_slices: int):
+    def __init__(self, points_dict: dict, control_points: np.ndarray, plotter: pv.Plotter, n_horizontal_slices: int, folder_path: str, control_points_offset: int):
         """Initialize the TunnelSlicer object."""
         self.points_dict = points_dict
         self.control_points = control_points.copy()
@@ -16,7 +16,7 @@ class TunnelSlicer:
 
         # Shift the control points to the center of the tunnel
         self.control_points_adjusted = control_points
-        self.control_points_adjusted[:, 0] += 1800
+        self.control_points_adjusted[:, 0] += control_points_offset
 
         self.tunnel_center_line_b_spline = None
         self._tck = None
@@ -25,6 +25,8 @@ class TunnelSlicer:
 
         # Bounds hardcoded so far ...
         self.hslice_planes = np.linspace(500, 5100.0, n_horizontal_slices)
+        
+        self.folder_path = folder_path
 
     
     def _find_b_spline_of_center_tunnel_line(self):
@@ -198,7 +200,7 @@ class TunnelSlicer:
         """Curve the tunnel points around the center line."""            
         for i, key in enumerate(self.points_dict.keys()):
             # Find the tangent vector at the control point
-            index = 247-int(key*2)
+            index = len(self.control_points_adjusted)-1-int(key*2)
             if index == 0:
                 tangent = self.control_points_adjusted[index+1] - self.control_points_adjusted[index]
             elif index == len(self.control_points_adjusted) - 1:
@@ -237,11 +239,12 @@ class TunnelSlicer:
         # Save to Parquet
         df.to_parquet(filename, index=False)
 
-    def load_from_parquet(self, filename="tunnel_pointcloud.parquet"):
+    def load_from_parquet(self, filename):
         """Load tunnel points from a Parquet file."""
         df = pd.read_parquet(filename)
         self.tunnel_points = df.to_numpy()
-
+        
+            
     def visualize_the_tunnel(self):
         """Visualize the tunnel, loading from cache if possible."""
 
@@ -249,12 +252,12 @@ class TunnelSlicer:
         self._find_b_spline_of_center_tunnel_line()
 
         # Load if Parquet file exists
-        if os.path.exists("data/tunnel_pointcloud.parquet"):
-            self.load_from_parquet("data/tunnel_pointcloud.parquet")
+        if os.path.exists(f"{self.folder_path}/tunnel_pointcloud.parquet"):
+            self.load_from_parquet(f"{self.folder_path}/tunnel_pointcloud.parquet")
         else:
             self._transform_points()
-            self.save_to_parquet("data/tunnel_pointcloud.parquet")
-
+            self.save_to_parquet(f"{self.folder_path}/tunnel_pointcloud.parquet")
+        
         # Add points to plot
         self.plotter.add_points(self.tunnel_points, color="lightblue", point_size=2, label="Tunnel")
         
@@ -263,6 +266,8 @@ class TunnelSlicer:
         
         # Generate splines (on walls) at different y values 
         self._generate_splines_at_y_values(epsilon=5, visualize=True)
+        
+        #self._show_curve()
 
 
 if __name__ == "__main__":
@@ -273,7 +278,7 @@ if __name__ == "__main__":
     lambda z: -np.log(z+1)*300
     """
 
-    curve_function = lambda z: z
+    """ curve_function = lambda z: z
     space_out_factor = 1000
 
     points_dict = efficient_data_loading("data/Predor Ringo 511869.90-511746.75.xlsx", 0, curve_function, space_out_factor)
@@ -285,4 +290,4 @@ if __name__ == "__main__":
     tunnel_slicer.plotter.show_axes()
     tunnel_slicer.plotter.camera.up = (0, 1, 0)
     tunnel_slicer.plotter.camera.zoom(1.5)
-    tunnel_slicer.plotter.show()
+    tunnel_slicer.plotter.show() """

@@ -1,12 +1,14 @@
-#read all files in the folder Predor Globoko
-
 import os
 
-def parse_txt_to_points_dict(folder_path: str, curve_function=None, space_out_factor=1000):
+def parse_txt_to_points_dict(folder_path: str, space_out_factor=1000):
     files = os.listdir(folder_path)
     dict = {}
+    
+    files = sorted(files, key=lambda x: int(x.split("_")[1]), reverse=True)
+    #print(files[0:10])
+    
     for filename in files:
-        #n = int(filename.split("_")[1])
+        #n = int(filename.split("_")[1])    
         km = int(filename.split(".")[1]) - 2355
         
         data = []
@@ -24,6 +26,5 @@ def parse_txt_to_points_dict(folder_path: str, curve_function=None, space_out_fa
     return dict 
         
         
-        
-        
-parse_txt_to_points_dict("data/Predor Globoko")
+if __name__ == "__main__":
+    parse_txt_to_points_dict("data/Predor Globoko")
