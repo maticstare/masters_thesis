@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 
 def parse_excel_to_points_dict(file_path: str, sheet_name=0, curve_function=None, space_out_factor=1000):
     data = pd.read_excel(file_path, sheet_name=sheet_name)
@@ -27,7 +28,25 @@ def parse_excel_to_points_dict(file_path: str, sheet_name=0, curve_function=None
 
     return dict
 
-def prepare_control_points(data: dict, space_out_factor: int, curve_function: callable = None):
+def load_control_points_from_txt(file_path, space_out_factor=1000):
+    try:
+        control_points = np.loadtxt(file_path)
+        print(f"Loaded {len(control_points)} control points from {file_path}")
+        return control_points
+    except Exception as e:
+        print(f"Error loading control points: {e}")
+        return None
+
+def prepare_control_points(data: dict, space_out_factor: int, curve_function: callable = None, folder_path=None):
+    # Load control points from a file if it exists
+    if folder_path:
+        control_points_file = f"{folder_path}/control_points.txt"
+        if os.path.exists(control_points_file):
+            loaded_points = load_control_points_from_txt(control_points_file)
+            if loaded_points is not None:
+                return loaded_points
+    
+    # Else generate control points from data
     control_points = np.zeros((len(data.keys()), 3))
     min_key = min(data.keys())
     for i, key in enumerate(data.keys()):
