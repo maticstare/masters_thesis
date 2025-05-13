@@ -164,11 +164,30 @@ class TunnelSlicer:
 
         # Rotation axis (intersection line direction)
         rotation_axis = np.cross(n1, n2)
-        rotation_axis /= np.linalg.norm(rotation_axis)  # Normalize
-
-        # Rotation angle
-        cos_theta = np.clip(np.dot(n1, n2), -1.0, 1.0)  # Avoid precision errors
-        theta = np.arccos(cos_theta)
+        norm = np.linalg.norm(rotation_axis)
+        
+        # Check if the rotation axis is valid (not zero)
+        if norm < 1e-10:  # If normals are parallel or anti-parallel
+            # No rotation needed if normals are parallel
+            if np.dot(n1, n2) > 0:
+                return points
+            # If normals are anti-parallel, we need a different rotation axis
+            else:
+                # Find a vector perpendicular to n1
+                if abs(n1[0]) < abs(n1[1]):
+                    rotation_axis = np.cross(n1, np.array([1.0, 0.0, 0.0]))
+                else:
+                    rotation_axis = np.cross(n1, np.array([0.0, 1.0, 0.0]))
+                rotation_axis /= np.linalg.norm(rotation_axis)
+                # Use 180 degree rotation
+                theta = np.pi
+        else:
+            # Normal case - valid rotation axis
+            rotation_axis /= norm  # Normalize
+            
+            # Rotation angle
+            cos_theta = np.clip(np.dot(n1, n2), -1.0, 1.0)  # Avoid precision errors
+            theta = np.arccos(cos_theta)
 
         # Rodrigues' rotation formula components
         cos_theta = np.cos(theta)
@@ -199,23 +218,34 @@ class TunnelSlicer:
     def _curve_points(self):
         """Curve the tunnel points around the center line."""            
         for i, key in enumerate(self.points_dict.keys()):
-            # Find the tangent vector at the control point
-            index = len(self.control_points_adjusted)-1-int(key*2)
+            # Find the corresponding control point index
+            index = int(key*2)
+            index = min(index, len(self.control_points_adjusted)-1)
+            
+            # Get the control point position to curve around
+            control_point = self.control_points_adjusted[index]
+            
             if index == 0:
                 tangent = self.control_points_adjusted[index+1] - self.control_points_adjusted[index]
             elif index == len(self.control_points_adjusted) - 1:
                 tangent = self.control_points_adjusted[index] - self.control_points_adjusted[index-1]
             else:
                 tangent = self.control_points_adjusted[index+1] - self.control_points_adjusted[index-1]
+            
             # Now transform the points at the key so they would be perpendicular to the tangent vector
             points = np.zeros((len(self.points_dict[key]["X"]), 3))
-            for i in range(len(self.points_dict[key]["X"])):
-                points[i] = np.array([
-                    self.points_dict[key]["X"].iloc[i],
-                    self.points_dict[key]["Y"].iloc[i],
-                    self.points_dict[key]["Z"].iloc[i]
+            for j in range(len(self.points_dict[key]["X"])):
+                # Use the original point positions, but offset X by the control point's X value
+                # This applies the curve from the control points to the tunnel points
+                points[j] = np.array([
+                    self.points_dict[key]["X"].iloc[j] + control_point[0],
+                    self.points_dict[key]["Y"].iloc[j],
+                    self.points_dict[key]["Z"].iloc[j]
                 ])
-            rotated_points = self._rotate_points(points, np.array([0, 0, 1]), tangent, self.control_points_adjusted[index])
+            
+            # Rotate these points to align with the tangent vector
+            rotated_points = self._rotate_points(points, np.array([0, 0, 1]), tangent, control_point)
+            
             self.points_dict[key]["X"] = pd.Series(rotated_points[:, 0])
             self.points_dict[key]["Y"] = pd.Series(rotated_points[:, 1])
             self.points_dict[key]["Z"] = pd.Series(rotated_points[:, 2])

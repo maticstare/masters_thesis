@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 
-def parse_excel_to_points_dict(file_path: str, sheet_name=0, curve_function=None, space_out_factor=1000):
+def parse_excel_to_points_dict(file_path: str, sheet_name=0, space_out_factor=1000):
     data = pd.read_excel(file_path, sheet_name=sheet_name)
     dict = {}
     min_distance = data[data.columns[len(data.columns)-4]].iloc[0]
@@ -19,16 +19,10 @@ def parse_excel_to_points_dict(file_path: str, sheet_name=0, curve_function=None
             "Y": Y,
             "Z": Z
         }
-        
-    # Curve X
-    for j, key in enumerate(dict.keys()):
-        X = dict[key]["X"]
-        for i in range(len(X)):
-            X.iloc[i] = X.iloc[i] + curve_function(j) if curve_function else X.iloc[i]
 
     return dict
 
-def load_control_points_from_txt(file_path, space_out_factor=1000):
+def load_control_points_from_txt(file_path):
     try:
         control_points = np.loadtxt(file_path)
         print(f"Loaded {len(control_points)} control points from {file_path}")
@@ -47,16 +41,20 @@ def prepare_control_points(data: dict, space_out_factor: int, curve_function: ca
                 return loaded_points
     
     # Else generate control points from data
-    control_points = np.zeros((len(data.keys()), 3))
-    min_key = min(data.keys())
-    for i, key in enumerate(data.keys()):
+    sorted_keys = sorted(list(data.keys()))
+    control_points = np.zeros((len(sorted_keys), 3))
+    
+    min_key = min(sorted_keys)
+    for i, key in enumerate(sorted_keys):
         normalized_key = key - min_key
         control_points[i, 2] = normalized_key*space_out_factor
         control_points[i, 0] = curve_function(i) if curve_function else 0
+        
+    print("Generated control points from data")
     return control_points
 
-def parse_to_parquet(file_path: str, sheet_name=0, curve_function=None, space_out_factor=1000):
-    data = parse_excel_to_points_dict(file_path, sheet_name, curve_function, space_out_factor)
+def parse_to_parquet(file_path: str, sheet_name=0, space_out_factor=1000):
+    data = parse_excel_to_points_dict(file_path, sheet_name, space_out_factor)
     rows = []
     for distance, coords in data.items():
         for i in range(len(coords["X"])):
@@ -77,9 +75,9 @@ def read_parquet(file_path):
         }
     return data
 
-def efficient_data_loading(file_path: str, sheet_name=0, curve_function=None, space_out_factor=1000):
+def efficient_data_loading(file_path: str, sheet_name=0, space_out_factor=1000):
     try:
         return read_parquet(file_path.replace(".xlsx", ".parquet"))
     except:
-        parse_to_parquet(file_path, sheet_name, curve_function, space_out_factor)
+        parse_to_parquet(file_path, sheet_name, space_out_factor)
         return read_parquet(file_path.replace(".xlsx", ".parquet"))
