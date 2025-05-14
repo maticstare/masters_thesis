@@ -45,7 +45,7 @@ tunnel_slicer.visualize_the_tunnel()
 
 wagon = TrainWagon(width=2000, height=5000, depth=6000, color="blue")
 
-simulate_wagon_movement(plotter, control_points, wagon, speed=0.1, export_mp4=False)
+simulate_wagon_movement(plotter, control_points, wagon, control_points_offset=control_points_offset, speed=0.001, export_mp4=False)
 
 plotter.enable()
 plotter.show()

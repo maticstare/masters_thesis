@@ -79,10 +79,9 @@ def get_p1(point, control_points, radius):
     return np.array([x, 0, z])
 
 
-def simulate_wagon_movement(plotter, control_points, wagon, speed=0.1, export_mp4=False):
+def simulate_wagon_movement(plotter, control_points, wagon, control_points_offset=0, speed=0.1, export_mp4=False):
     """Simulate the movement of a train wagon along a tunnel."""
-    control_points = control_points[::-1]
-    control_points[:, 0] -= 350
+    control_points[:, 0] += control_points_offset
     wagon_mesh = wagon.create_mesh()
     plotter.add_mesh(wagon_mesh, color=wagon.color, show_edges=True)
     plotter.add_points(control_points, color="red", point_size=5)
