@@ -7,7 +7,7 @@ from tunnel_slicer import *
 from data_preprocessing.excel_parser import *
 
 class TrainWagon:
-    def __init__(self, width=1.0, height=1.0, depth=1.0, center=(0, 0, 0), color="white"):
+    def __init__(self, width: int, height: int, depth: int, center: tuple, color: str):
         """
         Initialize the TrainWagon object.
         
@@ -23,43 +23,93 @@ class TrainWagon:
         self.center = center
         self.color = color
     
-    def create_mesh(self):
+    def create_mesh(self) -> pv.PolyData:
         """Creates and returns a PyVista train wagon mesh."""
-        wagon = pv.Cube(center=self.center, x_length=self.width, y_length=self.height, z_length=self.depth)
+        wagon = pv.Cube(
+            center=self.center, 
+            x_length=self.width, 
+            y_length=self.height, 
+            z_length=self.depth
+        )
         wagon.color = self.color
         return wagon
 
 
-def get_new_positions(control_points, i, wagon):
-        width, height, depth = wagon.width, wagon.height, wagon.depth
-        p0 = control_points[i]
-        p1 = get_p1(control_points[i], control_points, depth)
-        if p1[2] < p0[2]:
-            return
+def calculate_orthogonal_coordinate_system(control_points: np.ndarray, i: int, depth: float) -> tuple:
+    """
+    Calculate orthogonal coordinate system (forward, up, right) at i-th control point.
+    
+    :param control_points: Array of control points defining the path
+    :param i: Current control point index
+    :param depth: Distance to calculate the forward direction
+    :return: Tuple of (p0, p1, forward, up, right) vectors
+    """
+    p0 = control_points[i]
+    p1 = get_p1(control_points[i], control_points, depth)
+    
+    # Handle the cases at the end of the tunnel
+    if p1[2] < p0[2]:
+        direction = control_points[i+1] - p0
+        direction = direction / np.linalg.norm(direction)
+        p1 = p0 + depth * direction
+        
+    # Calculate orthogonal coordinate system
+    forward = (p1 - p0) / np.linalg.norm(p1 - p0)
+    up = np.array([0, 1, 0])
+    right = np.cross(up, forward)
+    right = right / np.linalg.norm(right)
+    
+    return p0, p1, forward, up, right
 
-        new_positions = [
-            p0 + np.array([-width/2, 0, 0]),
-            p1 + np.array([-width/2, 0, 0]),
-            p1 + np.array([-width/2, height, 0]),
-            p0 + np.array([-width/2, height, 0]),
-            p0 + np.array([width/2, 0, 0]),
-            p0 + np.array([width/2, height, 0]),
-            p1 + np.array([width/2, height, 0]),
-            p1 + np.array([width/2, 0, 0])
-        ]
-        return np.array(new_positions)
+
+def get_new_positions(control_points: np.ndarray, i: int, wagon: TrainWagon) -> np.ndarray:
+    """
+    Calculate new vertex positions for the wagon mesh based on control points.
+    
+    :param control_points: Array of control points defining the path
+    :param i: Current control point index
+    :param wagon: TrainWagon object
+    :return: Array of new vertex positions for the wagon mesh
+    """
+    width, height, depth = wagon.width, wagon.height, wagon.depth
+    
+    # Get orthogonal coordinate system
+    p0, p1, _, up, right = calculate_orthogonal_coordinate_system(control_points, i, depth)
+    
+    half_width = width / 2
+    
+    vertices = [
+        p0 - right * half_width,                    # Vertex 0
+        p1 - right * half_width,                    # Vertex 1
+        p1 - right * half_width + up * height,      # Vertex 2
+        p0 - right * half_width + up * height,      # Vertex 3
+        p0 + right * half_width,                    # Vertex 4
+        p0 + right * half_width + up * height,      # Vertex 5
+        p1 + right * half_width + up * height,      # Vertex 6
+        p1 + right * half_width                     # Vertex 7
+    ]
+    
+    return np.array(vertices)
 
 
-def get_p1(point, control_points, radius):
+def get_p1(point: np.ndarray, control_points: np.ndarray, radius: float) -> np.ndarray:
+    """
+    Calculate the next point along a B-spline curve.
+    
+    :param point: Current 3D point [x, y, z] from which to measure distance
+    :param control_points: Array of control points defining the path, shape (n, 3)
+    :param radius: Distance (radius) from current point to find the next point
+    :return: Next point as [x, 0, z]
+    """
     x_c, z_c = point[0], point[2]
     x_points, z_points = control_points[:, 0], control_points[:, 2]
 
     # Fit a parametric B-spline (tck contains the knots, coefficients, and degree)
     tck, _ = splprep([x_points, z_points], s=0)
 
-
     # Function to compute the intersection equation
-    def intersection_function(t):
+    def intersection_function(t: float) -> float:
+        """Calculate distance squared minus radius squared for parameter t."""
         x, z = splev(t, tck)
         return (x - x_c) ** 2 + (z - z_c) ** 2 - radius ** 2
 
@@ -73,15 +123,51 @@ def get_p1(point, control_points, radius):
             root = root_scalar(intersection_function, bracket=[t1, t2]).root
             intersection_points.append(splev(root, tck))  # Store intersection coordinates
 
-    #take the point with highest z value
+    # Take the point with highest z value
     intersection_points = np.array(intersection_points)
     x, z = intersection_points[np.argmax(intersection_points[:, 1])]
     return np.array([x, 0, z])
 
 
-def simulate_wagon_movement(plotter, control_points, wagon, control_points_offset=0, speed=0.1, export_mp4=False):
-    """Simulate the movement of a train wagon along a tunnel."""
+def update_camera(plotter: pv.Plotter, control_points: np.ndarray, i: int, wagon: TrainWagon, wagon_center: np.ndarray, distance_back: float = 2.0, height_above: float = 1.5):
+    """
+    Update camera position to follow the wagon using orthogonal coordinate system.
+    
+    :param plotter: PyVista plotter object
+    :param control_points: Array of control points defining the path
+    :param i: Current control point index
+    :param wagon: TrainWagon object
+    :param wagon_center: Current center position of the wagon
+    :param distance_back: Distance behind the wagon (multiplied by wagon depth)
+    :param height_above: Height above the wagon (multiplied by wagon height)
+    """
+    # Get orthogonal coordinate system
+    _, _, forward, up, _ = calculate_orthogonal_coordinate_system(control_points, i, wagon.depth)
+    
+    # Calculate camera position using the orthogonal coordinate system
+    camera_position = wagon_center - forward * (wagon.depth * distance_back) + up * (wagon.height * height_above)
+    
+    # Set camera position and orientation
+    plotter.camera.position = camera_position
+    plotter.camera.focal_point = wagon_center
+    plotter.camera.up = up
+
+
+def simulate_wagon_movement(plotter: pv.Plotter, control_points: np.ndarray, wagon: TrainWagon, control_points_offset: float = 0, speed: float = 0.01, export_mp4: bool = False):
+    """
+    Simulate the movement of a train wagon along a tunnel.
+    
+    :param plotter: PyVista plotter object
+    :param control_points: Array of control points defining the path
+    :param wagon: TrainWagon object
+    :param control_points_offset: Offset to apply to control points
+    :param speed: Animation speed (sleep time between frames)
+    :param export_mp4: Whether to export animation as MP4
+    """
+    # Apply offset to control points
     control_points[:, 0] += control_points_offset
+    
+    # Setup visualization
     wagon_mesh = wagon.create_mesh()
     plotter.add_mesh(wagon_mesh, color=wagon.color, show_edges=True)
     plotter.add_points(control_points, color="red", point_size=5)
@@ -91,15 +177,18 @@ def simulate_wagon_movement(plotter, control_points, wagon, control_points_offse
     
     if export_mp4: plotter.open_movie("videos/tunnel.mp4")    
 
-    for i in range(len(control_points)):
+    for i in range(len(control_points) - 1):
         new_positions = get_new_positions(control_points, i, wagon)
         if new_positions is None:
             break
+        
+        # Update wagon position
         wagon_mesh.points = new_positions
-        plotter.camera.focal_point = wagon_mesh.center + np.array([0, wagon.height/2, 0])
-        plotter.camera.position = plotter.camera.focal_point + np.array([0, 1000, -10500])
+        
+        # Update camera
+        update_camera(plotter, control_points, i, wagon, wagon_mesh.center, distance_back=5.0, height_above=0.5)
 
+        # Render frame
         plotter.update()
         if export_mp4: plotter.write_frame()
         time.sleep(speed)
-    
