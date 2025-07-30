@@ -3,8 +3,9 @@ import numpy as np
 import time
 from scipy.interpolate import splprep, splev
 from scipy.optimize import root_scalar
-from tunnel_slicer import *
+from tunnel_slicer import TunnelSlicer
 from data_preprocessing.excel_parser import *
+#from collision_detector import CollisionDetector
 
 class TrainWagon:
     def __init__(self, width: int, height: int, depth: int, center: tuple, color: str):
@@ -79,14 +80,14 @@ def get_new_positions(control_points: np.ndarray, i: int, wagon: TrainWagon) -> 
     half_width = width / 2
     
     vertices = [
-        p0 - right * half_width,                    # Vertex 0
-        p1 - right * half_width,                    # Vertex 1
-        p1 - right * half_width + up * height,      # Vertex 2
-        p0 - right * half_width + up * height,      # Vertex 3
-        p0 + right * half_width,                    # Vertex 4
-        p0 + right * half_width + up * height,      # Vertex 5
-        p1 + right * half_width + up * height,      # Vertex 6
-        p1 + right * half_width                     # Vertex 7
+        p0 - right * half_width,
+        p1 - right * half_width,
+        p1 - right * half_width + up * height,
+        p0 - right * half_width + up * height,
+        p0 + right * half_width,
+        p0 + right * half_width + up * height,
+        p1 + right * half_width + up * height,
+        p1 + right * half_width
     ]
     
     return np.array(vertices)
@@ -153,30 +154,36 @@ def update_camera(plotter: pv.Plotter, control_points: np.ndarray, i: int, wagon
     plotter.camera.up = up
 
 
-def simulate_wagon_movement(plotter: pv.Plotter, control_points: np.ndarray, wagon: TrainWagon, control_points_offset: float = 0, speed: float = 0.01, export_mp4: bool = False):
+def simulate_wagon_movement(plotter: pv.Plotter, control_points: np.ndarray, wagon: TrainWagon, tunnel_slicer: TunnelSlicer, control_points_offset: float = 0, speed: float = 0.01, export_mp4: bool = False, stop_on_safety_violation: bool = True, safety_margin: float = 300.0):
     """
-    Simulate the movement of a train wagon along a tunnel.
+    Simulate the movement of a train wagon along a tunnel with collision detection.
     
     :param plotter: PyVista plotter object
     :param control_points: Array of control points defining the path
     :param wagon: TrainWagon object
+    :param tunnel_slicer: TunnelSlicer instance for collision detection
     :param control_points_offset: Offset to apply to control points
-    :param speed: Animation speed (sleep time between frames)
-    :param export_mp4: Whether to export animation as MP4
+    :param speed: Animation speed (seconds between frames)
+    :param export_mp4: Whether to export animation to MP4
+    :param stop_on_safety_violation: If True, stop and visualize first safety violation OR collision
+    :param safety_margin: Safety distance threshold in mm (default: 300mm)
     """
     # Apply offset to control points
     control_points[:, 0] += control_points_offset
     
+    #collision_detector = CollisionDetector(tunnel_slicer, safety_margin=safety_margin)
+    
     # Setup visualization
     wagon_mesh = wagon.create_mesh()
-    plotter.add_mesh(wagon_mesh, color=wagon.color, show_edges=True)
-    plotter.add_points(control_points, color="red", point_size=5)
+    plotter.add_mesh(wagon_mesh, color=wagon.color, show_edges=True, label="Train Wagon")
+    plotter.add_points(control_points, color="red", point_size=5, label="Control Points")
     plotter.show(interactive_update=True)
     plotter.show_axes()
     plotter.disable()
     
     if export_mp4: plotter.open_movie("videos/tunnel.mp4")    
 
+    # Main simulation loop
     for i in range(len(control_points) - 1):
         new_positions = get_new_positions(control_points, i, wagon)
         if new_positions is None:
@@ -185,10 +192,28 @@ def simulate_wagon_movement(plotter: pv.Plotter, control_points: np.ndarray, wag
         # Update wagon position
         wagon_mesh.points = new_positions
         
-        # Update camera
-        update_camera(plotter, control_points, i, wagon, wagon_mesh.center, distance_back=5.0, height_above=0.5)
-
+        # Update camera to follow wagon
+        update_camera(plotter, control_points, i, wagon, wagon_mesh.center, distance_back=5.0, height_above=0.7)
+        
+        # Collision Detection
+        """ collision_result = collision_detector.check_collision(
+            new_positions,
+            frame_number=i,
+            safety_margin=safety_margin,
+            stop_on_safety_violation=stop_on_safety_violation
+        ) """
+        
+        #if len(collision_detector.collision_history) > 0:
+        #   break
+        
+        
+        
+        
         # Render frame
         plotter.update()
         if export_mp4: plotter.write_frame()
         time.sleep(speed)
+    
+    
+    if export_mp4:
+        plotter.close()
