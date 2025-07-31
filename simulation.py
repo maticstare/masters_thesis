@@ -1,180 +1,129 @@
 import numpy as np
-from scipy.interpolate import splprep, splev
-from scipy.optimize import root_scalar
-import time
+import pyvista as pv
+from typing import Optional
 from collision_detector import CollisionDetector
+from train_generator import Train
+from tunnel_slicer import TunnelSlicer
 
 class Simulation:
-    def __init__(self, plotter, control_points, wagon, tunnel_slicer, control_points_offset=0, speed=0.01, export_mp4=False, stop_on_safety_violation=True, safety_margin=300.0):
+    """
+    Main simulation controller for train movement through tunnel.
+    
+    Handles train positioning, camera control, collision detection,
+    and visualization/recording of the simulation.
+    """
+
+    def __init__(self, plotter: pv.Plotter, control_points: np.ndarray, train: Train, 
+                 tunnel_slicer: TunnelSlicer, control_points_offset: int = 0, 
+                 export_mp4: bool = False, stop_on_safety_violation: bool = True, 
+                 safety_margin: float = 300.0) -> None:
+        """
+        Initialize the simulation.
+        
+        Args:
+            plotter: PyVista plotter for visualization
+            control_points: Array of points defining the track path
+            train: Train object containing wagons
+            tunnel_slicer: TunnelSlicer object for tunnel geometry
+            control_points_offset: Offset to align control points with track in millimeters
+            export_mp4: Whether to export video as MP4 file
+            stop_on_safety_violation: Whether to stop simulation on collision detection
+            safety_margin: Safety distance from tunnel walls in millimeters
+        """
         self.plotter = plotter
         self.control_points = control_points.copy()
-        self.wagon = wagon
+        self.train = train
         self.tunnel_slicer = tunnel_slicer
         self.control_points_offset = control_points_offset
-        self.speed = speed
         self.export_mp4 = export_mp4
         self.stop_on_safety_violation = stop_on_safety_violation
         self.safety_margin = safety_margin
         
-        # Initialize components
         self.collision_detector = CollisionDetector(tunnel_slicer, safety_margin=safety_margin)
-        self.wagon_mesh = None
         self._setup_simulation()
     
-    def _setup_simulation(self):
-        """Initialize the simulation environment."""
-        # Apply offset to control points
+    def _setup_simulation(self) -> None:
+        """Initialize the simulation environment and visualization."""
         self.control_points[:, 0] += self.control_points_offset
         
-        # Setup visualization
-        self.wagon_mesh = self.wagon.create_mesh()
-        self.plotter.add_mesh(self.wagon_mesh, color=self.wagon.color, show_edges=True, label="Train Wagon")
+        for i, wagon in enumerate(self.train.wagons):
+            wagon_mesh = self.train.wagon_meshes[i]
+            self.plotter.add_mesh(wagon_mesh, color=wagon.color, show_edges=True, label=f"Wagon {i+1}")
+        
         self.plotter.add_points(self.control_points, color="red", point_size=5, label="Control Points")
+        
         self.plotter.show(interactive_update=True)
-        self.plotter.show_axes()
         self.plotter.disable()
         
         if self.export_mp4:
             self.plotter.open_movie("videos/tunnel.mp4")
     
-    def get_new_positions(self, i: int) -> np.ndarray:
+    def _update_camera(self, i: int, distance_back: float = 2.0, height_above: float = 1.0) -> None:
         """
-        Calculate new vertex positions for the wagon mesh based on control points.
+        Update camera position to follow the control wagon.
         
-        :param i: Current control point index
-        :return: Array of new vertex positions for the wagon mesh
+        Args:
+            i: Current control point index
+            distance_back: Distance multiplier behind wagon (relative to wagon depth)
+            height_above: Height multiplier above wagon (relative to wagon height)
         """
-        width, height, depth = self.wagon.width, self.wagon.height, self.wagon.depth
+        control_wagon = self.train.wagons[0]
+        wagon_center = control_wagon.center
+        _, _, forward, up, _ = control_wagon._calculate_orthogonal_coordinate_system(
+            self.control_points, i, control_wagon.depth, self.train
+        )
         
-        # Get orthogonal coordinate system
-        p0, p1, _, up, right = self._calculate_orthogonal_coordinate_system(i, depth)
+        camera_position = (wagon_center - 
+                          forward * (control_wagon.depth * distance_back) + 
+                          up * (control_wagon.height * height_above))
         
-        half_width = width / 2
-        
-        vertices = [
-            p0 - right * half_width,
-            p1 - right * half_width,
-            p1 - right * half_width + up * height,
-            p0 - right * half_width + up * height,
-            p0 + right * half_width,
-            p0 + right * half_width + up * height,
-            p1 + right * half_width + up * height,
-            p1 + right * half_width
-        ]
-        
-        return np.array(vertices)
-    
-    def _get_p1(self, point: np.ndarray, radius: float) -> np.ndarray:
-        """
-        Calculate the next point along a B-spline curve.
-        
-        :param point: Current 3D point [x, y, z] from which to measure distance
-        :param radius: Distance (radius) from current point to find the next point
-        :return: Next point as [x, 0, z]
-        """
-        x_c, z_c = point[0], point[2]
-        x_points, z_points = self.control_points[:, 0], self.control_points[:, 2]
-
-        # Fit a parametric B-spline
-        tck, _ = splprep([x_points, z_points], s=0)
-
-        # Function to compute the intersection equation
-        def intersection_function(t: float) -> float:
-            """Calculate distance squared minus radius squared for parameter t."""
-            x, z = splev(t, tck)
-            return (x - x_c) ** 2 + (z - z_c) ** 2 - radius ** 2
-
-        # Find intersection points by checking sign changes
-        t_vals = np.linspace(0, 1, 1000)
-        intersection_points = []
-
-        for i in range(len(t_vals) - 1):
-            t1, t2 = t_vals[i], t_vals[i + 1]
-            if intersection_function(t1) * intersection_function(t2) < 0:
-                root = root_scalar(intersection_function, bracket=[t1, t2]).root
-                intersection_points.append(splev(root, tck))
-
-        # Take the point with highest z value
-        intersection_points = np.array(intersection_points)
-        x, z = intersection_points[np.argmax(intersection_points[:, 1])]
-        return np.array([x, 0, z])
-    
-    def _calculate_orthogonal_coordinate_system(self, i: int, depth: float) -> tuple:
-        """
-        Calculate orthogonal coordinate system (forward, up, right) at i-th control point.
-        
-        :param i: Current control point index
-        :param depth: Distance to calculate the forward direction
-        :return: Tuple of (p0, p1, forward, up, right) vectors
-        """
-        p0 = self.control_points[i]
-        p1 = self._get_p1(self.control_points[i], depth)
-        
-        # Handle the cases at the end of the tunnel
-        if p1[2] < p0[2]:
-            direction = self.control_points[i+1] - p0
-            direction = direction / np.linalg.norm(direction)
-            p1 = p0 + depth * direction
-            
-        # Calculate orthogonal coordinate system
-        forward = (p1 - p0) / np.linalg.norm(p1 - p0)
-        up = np.array([0, 1, 0])
-        right = np.cross(up, forward)
-        right = right / np.linalg.norm(right)
-        
-        return p0, p1, forward, up, right
-    
-    def _update_camera(self, i: int, wagon_center: np.ndarray, distance_back: float = 2.0, height_above: float = 1.5):
-        """
-        Update camera position to follow the wagon using orthogonal coordinate system.
-        
-        :param i: Current control point index
-        :param wagon_center: Current center position of the wagon
-        :param distance_back: Distance behind the wagon (multiplied by wagon depth)
-        :param height_above: Height above the wagon (multiplied by wagon height)
-        """
-        # Get orthogonal coordinate system
-        _, _, forward, up, _ = self._calculate_orthogonal_coordinate_system(i, self.wagon.depth)
-        
-        # Calculate camera position using the orthogonal coordinate system
-        camera_position = wagon_center - forward * (self.wagon.depth * distance_back) + up * (self.wagon.height * height_above)
-        
-        # Set camera position and orientation
         self.plotter.camera.position = camera_position
         self.plotter.camera.focal_point = wagon_center
         self.plotter.camera.up = up
     
-    def run(self):
-        """Run the simulation."""
-        # Main simulation loop
+    def run(self) -> None:
+        """
+        Execute the main simulation loop.
+        
+        Moves train along control points, checks for collisions,
+        updates visualization, and handles video recording. The simulation
+        can terminate early due to safety violations or reaching track end.
+        """
         for i in range(len(self.control_points) - 1):
-            new_positions = self.get_new_positions(i)
-            if new_positions is None:
+            # Update all wagon positions
+            terminate_simulation = self.train.update_wagon_positions(self.control_points, i)
+            
+            # Update camera to follow control wagon
+            self._update_camera(i, distance_back=2.0, height_above=0.8)
+            
+            # Perform collision detection for all wagons
+            safety_violation = False
+            for wagon_idx, wagon_mesh in enumerate(self.train.wagon_meshes):
+                collision_result = self.collision_detector.check_collision(
+                    wagon_mesh.points, i, self.safety_margin
+                )
+                
+                # Report any safety violations
+                if collision_result['safety_violation_detected']:
+                    print(f"Safety violation detected for Wagon {wagon_idx + 1} at frame {i}!")
+                    for violation in collision_result['violations']:
+                        print(f"  - Violation: {violation}")
+                    safety_violation = True
+            
+            # Stop simulation if safety violation occurs
+            if safety_violation and self.stop_on_safety_violation:
+                print("Simulation stopped due to safety violation.")
                 break
             
-            # Update wagon position
-            self.wagon_mesh.points = new_positions
-            self.wagon.center = self.wagon_mesh.center
-            
-            # Update camera to follow wagon
-            self._update_camera(i, self.wagon.center, distance_back=5.0, height_above=0.7)
-
-            # Collision Detection
-            collision_result = self.collision_detector.check_collision(
-                new_positions,
-                frame_number=i,
-                safety_margin=self.safety_margin
-            )
-
-            if len(self.collision_detector.collision_history) > 0 and self.stop_on_safety_violation:
-                print("Stopping simulation due to safety violation.")
+            # Stop simulation if train reaches the end of control points
+            if terminate_simulation:
+                print("Train has reached the end of the track.")
                 break
-
-            # Render frame
+            
+            # Update visualization and record frame
             self.plotter.update()
             if self.export_mp4:
                 self.plotter.write_frame()
-            time.sleep(self.speed)
         
         if self.export_mp4:
             self.plotter.close()

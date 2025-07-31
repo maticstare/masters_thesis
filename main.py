@@ -1,7 +1,8 @@
 import pyvista as pv
+import numpy as np
 from tunnel_slicer import TunnelSlicer
 from data_preprocessing.excel_parser import efficient_data_loading, prepare_control_points
-from train_generator import TrainWagon
+from train_generator import Wagon, Train
 from simulation import Simulation
 
 """curve functions:
@@ -13,15 +14,14 @@ lambda z: -np.log(z+1)*300
 curve_function = lambda z: 0
 space_out_factor = 1000 # assuming 1 unit equals 1 millimeter
 
-
-tunnels = {
+tunnel_configs = {
     "ringo": {
         "folder_path": "data/ringo",
         "control_points_offset": 1800,
         "tunnel_center_offset": 3700,
         "train_max_height": 5700,
         "tunnel_slicer_min_height": 300,
-        "points_dict": efficient_data_loading(f"data/ringo/Predor Ringo 511869.90-511746.75.xlsx", 0, space_out_factor)
+        "excel_file": "data/ringo/Predor Ringo 511869.90-511746.75.xlsx"
     },
     "globoko": {
         "folder_path": "data/globoko",
@@ -29,18 +29,20 @@ tunnels = {
         "tunnel_center_offset": 0,
         "train_max_height": 4900,
         "tunnel_slicer_min_height": 50,
-        "points_dict": efficient_data_loading(f"data/globoko/Predor Globoko 471.0-235.5.xlsx", 0, space_out_factor)
+        "excel_file": "data/globoko/Predor Globoko 471.0-235.5.xlsx"
     }
 }
 
 tunnel = "globoko"
 #tunnel = "ringo"
 
-folder_path = tunnels[tunnel]["folder_path"]
-control_points_offset = tunnels[tunnel]["control_points_offset"] # align with railway track
-tunnel_center_offset = tunnels[tunnel]["tunnel_center_offset"] # align with tunnel center line
-tunnel_slicer_min_height = tunnels[tunnel]["tunnel_slicer_min_height"]
-points_dict = tunnels[tunnel]["points_dict"]
+selected_config = tunnel_configs[tunnel]
+folder_path = selected_config["folder_path"]
+control_points_offset = selected_config["control_points_offset"] # align with railway track
+tunnel_center_offset = selected_config["tunnel_center_offset"] # align with tunnel center line
+tunnel_slicer_min_height = selected_config["tunnel_slicer_min_height"]
+
+points_dict = efficient_data_loading(selected_config["excel_file"], 0, space_out_factor)
 
 control_points = prepare_control_points(points_dict, space_out_factor, curve_function, folder_path)
 
@@ -54,24 +56,26 @@ wall_spline_degree = 3
 safety_margin = 300
 stop_on_safety_violation = True
 export_mp4 = False
-speed = 0
 
-assert train_height <= tunnels[tunnel]["train_max_height"], f"Train height {train_height} exceeds maximum height {tunnels[tunnel]['train_max_height']} for tunnel {tunnel}."
-
+assert train_height <= selected_config["train_max_height"], f"Train height {train_height} exceeds maximum height {selected_config['train_max_height']} for tunnel {tunnel}."
 
 tunnel_slicer = TunnelSlicer(points_dict, control_points.copy(), plotter, n_horizontal_slices, train_height, folder_path, control_points_offset, tunnel_center_offset, tunnel_slicer_min_height)
 tunnel_slicer.visualize_the_tunnel(wall_spline_degree=wall_spline_degree)
 
 
-wagon = TrainWagon(width=train_width, height=train_height, depth=train_depth, color="blue")
+wagon1 = Wagon(width=train_width, height=train_height, depth=train_depth, color="blue")
+wagon2 = Wagon(width=train_width, height=train_height, depth=train_depth, color="red")
+wagon3 = Wagon(width=train_width, height=train_height, depth=train_depth, color="green")
+
+
+train = Train(wagons=[wagon1, wagon2], wagon_spacing=500)
 
 simulation = Simulation(
     plotter=plotter,
     control_points=control_points,
-    wagon=wagon,
+    train=train,
     tunnel_slicer=tunnel_slicer,
     control_points_offset=control_points_offset,
-    speed=speed,
     export_mp4=export_mp4,
     stop_on_safety_violation=stop_on_safety_violation,
     safety_margin=safety_margin

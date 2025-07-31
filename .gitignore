@@ -1,11 +1,8 @@
 /__pycache__
 /data_preprocessing/__pycache__
+/data_preprocessing/rail_extract.py
 /images
 /random_stuff
 /videos
 test.py
-map.png
-map2.png
-rail_extract.py
-drawing.svg
 data/globoko/globoko_old

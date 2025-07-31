@@ -1,33 +1,60 @@
 import numpy as np
+from typing import Dict, List, Optional, Tuple, Any
 from tunnel_slicer import TunnelSlicer
 import pyvista as pv
-from scipy.interpolate import splprep, splev
-from scipy.optimize import minimize_scalar
 
 class CollisionDetector:
-    def __init__(self, tunnel_slicer: TunnelSlicer, safety_margin: float = 200.0):
+    """
+    Collision detection system for train wagons in tunnel environment.
+    
+    Detects safety violations by checking if wagon points are too close to
+    tunnel walls or outside the tunnel boundaries.
+    """
+    
+    def __init__(self, tunnel_slicer: TunnelSlicer, safety_margin: float = 200.0) -> None:
         """
         Initialize the collision detection system.
         
-        :param tunnel_slicer: TunnelSlicer instance for tunnel geometry
-        :param safety_margin: Additional safety distance from walls (mm)
+        Args:
+            tunnel_slicer: TunnelSlicer instance for tunnel geometry
+            safety_margin: Additional safety distance from walls in millimeters
         """
         self.tunnel_slicer = tunnel_slicer
         self.safety_margin = safety_margin
-        self.collision_history = []
+        self.collision_history: List[Dict[str, Any]] = []
 
-    def find_closest_point_on_curve(self, point, curve_points, y_value):
-        """Find closest point on curve and determine which side the point is on."""
-        x, z = curve_points[:, 0], curve_points[:, 2]
+    def find_closest_point_on_curve(self, point: np.ndarray, curve_points: np.ndarray, y_value: float) -> Tuple[float, np.ndarray, np.ndarray]:
+        """
+        Find closest point on curve and determine which side the point is on.
+        
+        Args:
+            point: 3D point to check [x, y, z]
+            curve_points: Array of curve points defining the wall
+            y_value: Y-coordinate for the slice
+            
+        Returns:
+            Tuple of (side_value, point_3d, closest_3d) where side_value indicates
+            which side of the curve the point is on (positive/negative)
+        """
+        # curve_points are already the spline points, so find closest directly
         point_2d = np.array([point[0], point[2]])
+        curve_2d = curve_points[:, [0, 2]]  # Extract x,z coordinates
         
-        # Create spline
-        tck, _ = splprep([x, z], s=0)
+        # Find closest point by direct distance calculation
+        distances = np.linalg.norm(curve_2d - point_2d, axis=1)
+        closest_idx = np.argmin(distances)
+        closest_2d = curve_2d[closest_idx]
         
-        # Find closest point
-        result = minimize_scalar(lambda t: np.linalg.norm(splev(t, tck) - point_2d), bounds=(0, 1))
-        closest_2d = np.array(splev(result.x, tck))
-        tangent_2d = np.array(splev(result.x, tck, der=1))
+        # Calculate tangent at closest point for side determination
+        if closest_idx == 0:
+            tangent_2d = curve_2d[1] - curve_2d[0]
+        elif closest_idx == len(curve_2d) - 1:
+            tangent_2d = curve_2d[-1] - curve_2d[-2]
+        else:
+            # Use central difference for better accuracy
+            tangent_2d = curve_2d[closest_idx + 1] - curve_2d[closest_idx - 1]
+        
+        tangent_2d = tangent_2d / np.linalg.norm(tangent_2d)
         
         # Determine side using cross product
         vector_to_point = point_2d - closest_2d
@@ -39,8 +66,17 @@ class CollisionDetector:
         
         return side_value, point_3d, closest_3d
 
-    def get_wagon_points(self, wagon_vertices, y_value):
-        """Get wagon points for collision checking."""
+    def get_wagon_points(self, wagon_vertices: np.ndarray, y_value: float) -> Dict[str, Dict[str, np.ndarray]]:
+        """
+        Get wagon points for collision checking at specified Y-level.
+        
+        Args:
+            wagon_vertices: Array of 8 wagon vertices
+            y_value: Y-coordinate for the slice
+            
+        Returns:
+            Dictionary containing left/right side points (back, middle, front)
+        """
         points = {
             'right_back': wagon_vertices[0] + [0, y_value, 0],
             'right_front': wagon_vertices[1] + [0, y_value, 0],
@@ -61,8 +97,22 @@ class CollisionDetector:
             }
         }
 
-    def check_point_violation(self, point, point_name, wall_points, side, y_value, safety_margin, frame_number):
-        """Check if a single point violates safety constraints."""
+    def check_point_violation(self, point: np.ndarray, point_name: str, wall_points: np.ndarray, side: str, y_value: float, safety_margin: float, frame_number: int) -> Optional[Dict[str, Any]]:
+        """
+        Check if a single point violates safety constraints.
+        
+        Args:
+            point: 3D point to check
+            point_name: Name identifier for the point (e.g., "back", "middle", "front")
+            wall_points: Array of wall points for comparison
+            side: Wall side ("left" or "right")
+            y_value: Y-coordinate for the slice
+            safety_margin: Safety distance from walls in millimeters
+            frame_number: Current simulation frame number
+            
+        Returns:
+            Violation dictionary if violation detected, None otherwise
+        """
         side_value, point_3d, closest_wall = self.find_closest_point_on_curve(point, wall_points, y_value)
         distance = np.linalg.norm(point_3d - closest_wall)
         
@@ -83,8 +133,19 @@ class CollisionDetector:
             }
         return None
 
-    def check_collision(self, wagon_vertices, frame_number, safety_margin):
-        """Main collision detection method."""
+    def check_collision(self, wagon_vertices: np.ndarray, frame_number: int, safety_margin: float) -> Dict[str, Any]:
+        """
+        Main collision detection method.
+        
+        Args:
+            wagon_vertices: Array of 8 wagon vertices
+            frame_number: Current simulation frame number
+            safety_margin: Safety distance from walls in millimeters
+            
+        Returns:
+            Dictionary containing collision detection results including violations,
+            closest distances, and safety status
+        """
         results = {
             'safety_violation_detected': False,
             'violations': [],
@@ -115,8 +176,14 @@ class CollisionDetector:
             
         return results
 
-    def visualize_violation(self, plotter, violation):
-        """Draw violation visualization."""
+    def visualize_violation(self, plotter: pv.Plotter, violation: Dict[str, Any]) -> None:
+        """
+        Draw violation visualization in the plotter.
+        
+        Args:
+            plotter: PyVista plotter instance
+            violation: Violation dictionary containing point and distance information
+        """
         wagon_point = violation['wagon_point']
         wall_point = violation['wall_point']
         distance = violation['distance']
@@ -133,8 +200,14 @@ class CollisionDetector:
         plotter.add_points(wall_point.reshape(1, -1), color="purple", point_size=20)
         plotter.add_point_labels(wagon_point.reshape(1, -1), [label], point_size=0, font_size=14, text_color=color)
 
-    def get_collision_summary(self):
-        """Get summary of all collisions."""
+    def get_collision_summary(self) -> Dict[str, Any]:
+        """
+        Get summary of all collisions detected during simulation.
+        
+        Returns:
+            Dictionary containing collision statistics including total counts,
+            affected frames, minimum distances, and violation types
+        """
         all_violations = [v for collision in self.collision_history for v in collision.get('violations', [])]
         
         return {

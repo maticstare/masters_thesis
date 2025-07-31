@@ -2,20 +2,42 @@ import numpy as np
 import pyvista as pv
 import pandas as pd
 import os
+from typing import Dict, Tuple, Optional
 from data_preprocessing.excel_parser import *
 from scipy.interpolate import splprep, splev
 pv.global_theme.allow_empty_mesh = True
 
 class TunnelSlicer:
-    def __init__(self, points_dict: dict, control_points: np.ndarray, plotter: pv.Plotter, 
+    """
+    Processes and visualizes tunnel geometry with spline-based wall detection.
+    
+    Transforms tunnel point clouds along a curved path defined by control points,
+    generates horizontal slices for collision detection, and provides visualization
+    capabilities for tunnel walls and splines.
+    """
+    
+    def __init__(self, points_dict: Dict[str, pd.DataFrame], control_points: np.ndarray, plotter: pv.Plotter, 
                  n_horizontal_slices: int, train_height: int, folder_path: str, 
-                 control_points_offset: int, tunnel_center_offset: int, tunnel_slicer_min_height: int):
-        """Initialize the TunnelSlicer object."""
+                 control_points_offset: int, tunnel_center_offset: int, tunnel_slicer_min_height: int) -> None:
+        """
+        Initialize the TunnelSlicer object.
+        
+        Args:
+            points_dict: Dictionary containing tunnel point data organized by keys
+            control_points: Array of control points defining the track path
+            plotter: PyVista plotter for visualization
+            n_horizontal_slices: Number of horizontal slices for wall detection
+            train_height: Maximum height for slicing in millimeters
+            folder_path: Path to folder for caching processed data
+            control_points_offset: Offset to align control points with track in millimeters
+            tunnel_center_offset: Offset to align with tunnel center line in millimeters
+            tunnel_slicer_min_height: Minimum height for slicing in millimeters
+        """
         self.points_dict = points_dict
-        self.tunnel_points = None
+        self.tunnel_points: Optional[np.ndarray] = None
         self.plotter = plotter
         self.folder_path = folder_path
-        self.wall_points = {}
+        self.wall_points: Dict[float, Tuple[np.ndarray, np.ndarray]] = {}
                 
         # Shift the control points to align with the railway track
         self.control_points = control_points.copy()
@@ -25,25 +47,43 @@ class TunnelSlicer:
         self.control_points_tunnel_center = control_points.copy()
         self.control_points_tunnel_center[:, 0] += tunnel_center_offset
                 
-        self.control_points_b_spline = None
+        self.control_points_b_spline: Optional[np.ndarray] = None
         self.n_horizontal_slices = n_horizontal_slices
         self.y_values = np.linspace(tunnel_slicer_min_height, train_height, n_horizontal_slices)
 
-    def _find_b_spline_of_control_points(self):
+    def _find_b_spline_of_control_points(self) -> None:
         """Fit a B-spline to the control points."""
         tck, u = splprep(self.control_points.T, s=0)
         self.control_points_b_spline = np.column_stack((splev(u, tck)))
     
-    def _visualize_b_spline_line(self, points, color, width=3):
-        """Visualize the B-spline curve as a line."""
+    def _visualize_b_spline_line(self, points: np.ndarray, color: str, width: int = 3) -> None:
+        """
+        Visualize the B-spline curve as a line.
+        
+        Args:
+            points: Array of points defining the spline curve
+            color: Color for the line visualization
+            width: Line width for visualization
+        """
         n_points = points.shape[0]
         lines = np.hstack([[n_points] + list(range(n_points))]).astype(np.int32)
         polyline = pv.PolyData(points)
         polyline.lines = lines
         self.plotter.add_mesh(polyline, color=color, line_width=width)
     
-    def _fit_b_spline_to_walls(self, left_wall, right_wall, spline_degree, visualize):
-        """Fit a B-spline to the left and right walls of the tunnel."""
+    def _fit_b_spline_to_walls(self, left_wall: np.ndarray, right_wall: np.ndarray, spline_degree: int, visualize: bool) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Fit a B-spline to the left and right walls of the tunnel.
+        
+        Args:
+            left_wall: Array of left wall points
+            right_wall: Array of right wall points
+            spline_degree: Degree of the B-spline
+            visualize: Whether to visualize the fitted splines
+            
+        Returns:
+            Tuple of (left_wall_spline, right_wall_spline) arrays
+        """
         tck_left, u_left = splprep(left_wall.T, s=0, k=spline_degree)
         left_wall_spline = np.column_stack((splev(u_left, tck_left)))
 
@@ -53,9 +93,19 @@ class TunnelSlicer:
         if visualize:
             self._visualize_b_spline_line(left_wall_spline, color="blue", width=3)
             self._visualize_b_spline_line(right_wall_spline, color="red", width=3)
+    
+        return left_wall_spline, right_wall_spline
 
     def _classify_based_on_b_spline(self, point: np.ndarray) -> bool:
-        """Classify the point as left or right wall based on the B-spline curve."""
+        """
+        Classify the point as left or right wall based on the B-spline curve.
+        
+        Args:
+            point: 3D point to classify [x, y, z]
+            
+        Returns:
+            True if point is on left wall, False if on right wall
+        """
         px, _, pz = point
         curve_xz = self.control_points_tunnel_center[:, [0, 2]]
         
@@ -79,8 +129,15 @@ class TunnelSlicer:
         cross_product = np.cross(np.append(tangent, 0), np.append(vec_to_point, 0))
         return cross_product[2] <= 0
 
-    def _generate_splines_at_y_values(self, epsilon, wall_spline_degree, visualize):
-        """Generate splines on walls at different y values."""
+    def _generate_splines_at_y_values(self, epsilon: float, wall_spline_degree: int, visualize: bool) -> None:
+        """
+        Generate splines on walls at different y values.
+        
+        Args:
+            epsilon: Tolerance for Y-value filtering in millimeters
+            wall_spline_degree: Degree of spline for wall fitting
+            visualize: Whether to visualize the generated splines
+        """
         for y_value in self.y_values:
             left_wall, right_wall = [], []
             
@@ -133,11 +190,24 @@ class TunnelSlicer:
                         right_wall.append(representative_point)
             
             left_wall, right_wall = np.array(left_wall), np.array(right_wall)
-            self._fit_b_spline_to_walls(left_wall, right_wall, wall_spline_degree, visualize)
-            self.wall_points[y_value] = (left_wall, right_wall)
+        
+            left_wall_spline, right_wall_spline = self._fit_b_spline_to_walls(
+                left_wall, right_wall, wall_spline_degree, visualize
+            )
+            
+            # Store the spline points
+            self.wall_points[y_value] = (left_wall_spline, right_wall_spline)
 
-    def _prepare_points_for_rendering(self, data: dict) -> np.ndarray:
-        """Prepare the data for rendering."""
+    def _prepare_points_for_rendering(self, data: Dict[str, pd.DataFrame]) -> np.ndarray:
+        """
+        Prepare the data for rendering.
+        
+        Args:
+            data: Dictionary containing point data organized by keys
+            
+        Returns:
+            Array of all points prepared for visualization
+        """
         # Count total points
         total_points = sum(len(data[key]["X"]) for key in data.keys())
         points = np.zeros((total_points, 3))
@@ -154,8 +224,19 @@ class TunnelSlicer:
             
         return points
 
-    def _rotate_points(self, points, n1, n2, line_point):
-        """Rotate points from plane n1 to plane n2 around their intersection line."""
+    def _rotate_points(self, points: np.ndarray, n1: np.ndarray, n2: np.ndarray, line_point: np.ndarray) -> np.ndarray:
+        """
+        Rotate points from plane n1 to plane n2 around their intersection line.
+        
+        Args:
+            points: Array of points to rotate
+            n1: Normal vector of source plane
+            n2: Normal vector of target plane
+            line_point: Point on the rotation axis
+            
+        Returns:
+            Array of rotated points
+        """
         points = np.array(points)
         
         # Normalize normal vectors
@@ -200,7 +281,15 @@ class TunnelSlicer:
         return rotated_points
 
     def _get_tangent_from_index(self, index: int) -> np.ndarray:
-        """Get the tangent vector at the control point index."""
+        """
+        Get the tangent vector at the control point index.
+        
+        Args:
+            index: Index of the control point
+            
+        Returns:
+            Tangent vector at the specified control point
+        """
         if index == 0:
             return self.control_points[index + 1] - self.control_points[index]
         elif index == len(self.control_points) - 1:
@@ -209,13 +298,23 @@ class TunnelSlicer:
             return self.control_points[index + 1] - self.control_points[index - 1]
 
     def _curve_control_point(self, point: np.ndarray, control_point_index: int) -> np.ndarray:
+        """
+        Transform a point according to the curvature at a specific control point.
+        
+        Args:
+            point: 3D point to transform
+            control_point_index: Index of the control point to use for transformation
+            
+        Returns:
+            Transformed point following the curve
+        """
         control_point = self.control_points[control_point_index]
         point[0] += control_point[0]
         tangent = self._get_tangent_from_index(control_point_index)
         rotated_point = self._rotate_points(point.reshape(1, -1), np.array([0, 0, 1]), tangent, control_point)
         return rotated_point[0]
 
-    def _curve_points(self):
+    def _curve_points(self) -> None:
         """Curve the tunnel points around the center line."""            
         for i, key in enumerate(self.points_dict.keys()):
             index = min(int(key*2), len(self.control_points)-1)
@@ -237,24 +336,39 @@ class TunnelSlicer:
             self.points_dict[key]["Y"] = pd.Series(rotated_points[:, 1])
             self.points_dict[key]["Z"] = pd.Series(rotated_points[:, 2])
 
-    def _transform_points(self):
+    def _transform_points(self) -> None:
         """Transform the tunnel points."""
         self._curve_points()
         self.tunnel_points = self._prepare_points_for_rendering(self.points_dict)
 
-    def save_to_parquet(self, filename="tunnel_pointcloud.parquet"):
-        """Save tunnel points to a Parquet file."""
+    def save_to_parquet(self, filename: str = "tunnel_pointcloud.parquet") -> None:
+        """
+        Save tunnel points to a Parquet file.
+        
+        Args:
+            filename: Name of the output Parquet file
+        """
         assert self.tunnel_points is not None, "No tunnel points to save."
         df = pd.DataFrame(self.tunnel_points, columns=["X", "Y", "Z"])
         df.to_parquet(filename, index=False)
 
-    def load_from_parquet(self, filename):
-        """Load tunnel points from a Parquet file."""
+    def load_from_parquet(self, filename: str) -> None:
+        """
+        Load tunnel points from a Parquet file.
+        
+        Args:
+            filename: Path to the Parquet file to load
+        """
         df = pd.read_parquet(filename)
         self.tunnel_points = df.to_numpy()
             
-    def visualize_the_tunnel(self, wall_spline_degree=3):
-        """Visualize the tunnel, loading from cache if possible."""
+    def visualize_the_tunnel(self, wall_spline_degree: int = 3) -> None:
+        """
+        Visualize the tunnel, loading from cache if possible.
+        
+        Args:
+            wall_spline_degree: Degree of spline for wall fitting
+        """
         # Fit a B-spline to the control points
         self._find_b_spline_of_control_points()
 
