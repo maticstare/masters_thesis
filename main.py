@@ -2,7 +2,7 @@ import pyvista as pv
 import numpy as np
 from tunnel_slicer import TunnelSlicer
 from data_preprocessing.excel_parser import efficient_data_loading, prepare_control_points
-from train_generator import Wagon, Train
+from train_generator import Wagon
 from simulation import Simulation
 
 """curve functions:
@@ -63,17 +63,12 @@ tunnel_slicer = TunnelSlicer(points_dict, control_points.copy(), plotter, n_hori
 tunnel_slicer.visualize_the_tunnel(wall_spline_degree=wall_spline_degree)
 
 
-wagon1 = Wagon(width=train_width, height=train_height, depth=train_depth, color="blue")
-wagon2 = Wagon(width=train_width, height=train_height, depth=train_depth, color="red")
-wagon3 = Wagon(width=train_width, height=train_height, depth=train_depth, color="green")
-
-
-train = Train(wagons=[wagon1, wagon2], wagon_spacing=500)
+wagon = Wagon(width=train_width, height=train_height, depth=train_depth, wheel_offset=0.25, color="blue")
 
 simulation = Simulation(
     plotter=plotter,
     control_points=control_points,
-    train=train,
+    wagon=wagon,
     tunnel_slicer=tunnel_slicer,
     control_points_offset=control_points_offset,
     export_mp4=export_mp4,
