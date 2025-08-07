@@ -80,8 +80,8 @@
 \newcommand{\tauthor}{Matic Stare}
 \newcommand{\temail}{ms79450@student.uni-lj.si}
 \newcommand{\myyear}{2025}
-\newcommand{\tkeywords}{računalnik, računalnik, računalnik}
-\newcommand{\tkeywordsEn}{computer, computer, computer}
+\newcommand{\tkeywords}{železniški promet, zaznavanje trkov, analitično modeliranje, oblaki točk}
+\newcommand{\tkeywordsEn}{rail transport, collision detection, analytical modeling, point clouds}
 \newcommand{\mysupervisor}{doc.~dr.\ Uroš Čibej}
 \newcommand{\mycosupervisor}{/}
 
@@ -91,12 +91,12 @@
 %================================================================
 % ENG: main pages of the thesis
 %================================================================
-
+\iffalse
 %----------------------------------------------------------------
 % Poglavje (Chapter) 1
 %----------------------------------------------------------------
 \chapter{Uvod}
-\label{ch:uvod}
+%\label{ch:uvod}
 
 Datoteka {\tt magistrska\_naloga.tex} na kratko opisuje, kako se pisanja magistrskega dela lotimo z uporabo programskega pateka \LaTeX. V tem dokumentu bomo predstavili nekaj njegovih prednosti in hib. Kar se slednjih tiče, mi pride na misel ena sama. Ko se srečamo z njim, nam izgleda kot kislo jabolko, nismo prepričani, da bi želeli vanj ugrizniti. Lahko pa z njim pripravimo odličen zavitek ali pa pridemo na okus.
 
@@ -256,16 +256,288 @@ Psevdokoda~\ref{alg:primer} prikazuje primer delovanja genetskega algoritma, med
 %----------------------------------------------------------------
 \chapter{Kaj pa literatura?}
 \label{ch3}
-Kot smo omenili že v uvodu, je pravi način za citiranje literature uporaba \BibTeX{}a~\cite{ubi}.
-Programski paket \LaTeX je prvotno predstavljen v priročniku~\cite{Lamport} in je v resnici nadgradnja sistema \TeX\ avtorja Donalda Knutha, znanega po denimo, če izpustim njegovo umetnost programiranja, Knuth-Bendixovem algoritmu~\cite{Knuth}.
-
-Vsem raziskovalcem s področja računalništva pa svetujem v branje mnenje L.\ Fortnowa~\cite{Fortnow}.
+% Kot smo omenili že v uvodu, je pravi način za citiranje literature uporaba % \BibTeX{}a~\cite{ubi}.
+% Programski paket \LaTeX je prvotno predstavljen v priročniku~\cite{Lamport} % in je v resnici nadgradnja sistema \TeX\ avtorja Donalda Knutha, znanega po % denimo, če izpustim njegovo umetnost programiranja, Knuth-Bendixovem % algoritmu~\cite{Knuth}.
+% 
+% Vsem raziskovalcem s področja računalništva pa svetujem v branje mnenje L.\ % Fortnowa~\cite{Fortnow}.
 
 %----------------------------------------------------------------
 % Poglavje (Chapter) 6
 %----------------------------------------------------------------
 \chapter{Sklepne ugotovitve}
 Izbira \LaTeX\ ali ne \LaTeX\ je seveda prepuščena vam samim. Res je, da so prvi koraki v \LaTeX{}u težavni. Ta dokument naj vam služi kot začetna opora pri hoji.
+
+\fi
+
+
+
+
+
+%----------------------------------------------------------------
+% Poglavje (Chapter) 1
+%----------------------------------------------------------------
+\chapter{Uvod}
+\label{ch:uvod}
+
+\section{Opis problema}
+\label{sec:opis-problema}
+
+V železniškem prometu je zagotavljanje varnosti v predorih ključnega pomena, še posebej pri dolgi in široki tovorni kompoziciji, ki se giblje skozi ozke in ukrivljene predore. Problem, ki ga obravnavam v tej magistrski nalogi, je zaznavanje morebitnih trkov med vlakom in stenami predora, ki nastanejo zaradi nepravilnega sledenja predpisanemu varnostnemu prostoru ali napak v modeliranju geometrije predora.
+
+Klasične metode, kot je uporaba minimalnega prereza, so v takšnih scenarijih nezadostne, saj ne upoštevajo kompleksne ukrivljenosti poti ali relativnih premikov vagona, ki lahko presežejo varnostne meje, zlasti v ostrih ovinkih. Problem je izrazit pri dolgi tovorni kompoziciji, kjer razlika med položajem sprednje in zadnje osi povečuje tveganje za trk. Poleg tega trenutne metode pogosto niso dovolj prilagodljive za različne geometrije predorov in vlakov.
+
+
+\section{Motivacija in cilji dela}
+\label{sec:motivacija-cilji}
+
+Motivacija za delo izhaja iz realnega izziva, ki sem ga prejel od podjetja Slovenske železnice. Ti so izrazili potrebo po razvoju avtomatiziranega sistema, ki bi omogočil natančno zaznavanje trkov med vlakom in predorom. 
+
+V tej nalogi predlagam pristop, ki temelji na obdelavi oblaka točk predora in analitičnem modeliranju gibanja vlaka. Osnovna vhodna podatka sta oblak točk predora, pridobljen s 3D laserskim skenerjem, in kontrolne točke, ki definirajo pot železniške proge. Na podlagi teh podatkov sistem obdela geometrijo predora, generira B-zlepke za stene predora v različnih horizontalnih plasteh ter simulira gibanje vagona vzdolž kontrolnih točk. Med simulacijo se izvaja zaznavanje trkov s preverjanjem razdalj med kritičnimi točkami vagona in stenami predora.
+
+Naloga se umešča na področje računalniškega modeliranja in analize v prostoru ter prinaša novost v kombinaciji obdelave oblakov točk s simulacijo gibanja vlaka in zaznavanjem trkov v realnem času.
+
+
+
+\section{Prispevki magistrske naloge}
+\label{sec:prispevki}
+
+Magistrska naloga bo prispevala k razvoju sistema za zaznavanje trkov med vlakom in predorom s simulacijo gibanja vlaka. V primerjavi z obstoječimi metodami, ki temeljijo na statični analizi minimalnih prerezov, predlagana rešitev omogoča dinamično simulacijo gibanja in kontinuirano preverjanje varnostnih razdalj.
+
+Novost naloge je v integraciji obdelave oblakov točk predora z analitičnim modeliranjem gibanja vagona vzdolž ukrivljene poti ter implementaciji sistema za zaznavanje trkov v realnem času. Glavni prispevki magistrske naloge so:
+
+\begin{itemize}
+\item Razvoj sistema za obdelavo oblakov točk predora z B-zlepki za reprezentacijo sten
+\item Implementacija simulacije gibanja vagona vzdolž kontrolnih točk z ortogonalnim koordinatnim sistemom
+\item Sistem za zaznavanje trkov z analizo razdalj med kritičnimi točkami vagona in stenami predora
+\item Praktična aplikacija za Slovenske železnice z možnostjo nadaljnjega razvoja
+\end{itemize}
+
+
+
+\section{Struktura magistrske naloge}
+\label{sec:struktura}
+
+
+%----------------------------------------------------------------
+% Poglavje (Chapter) 2
+%----------------------------------------------------------------
+\chapter{Pregled sorodnih del}
+\label{ch:pregled-sorodnih-del}
+
+\section{Zaznavanje trkov v prostoru}
+\label{sec:zaznavanje-trkov}
+
+Na področju zaznavanja trkov v prostoru se pogosto uporabljajo metode, ki temeljijo na analizi oblakov točk in algoritmih prostorskega indeksiranja. Ena izmed najpogosteje uporabljenih tehnik je uporaba k-d dreves za učinkovito iskanje sosednjih točk v prostoru, kot je prikazano v delu Schauerja in Nüchterja~\cite{Schauer2014}. Prednost njihovega pristopa je visoka računska učinkovitost pri analizi oblakov točk velikega obsega. Ker pa je točk zelo veliko, se poraja potreba po bolj pametnih izračunih trkov. Njihov članek bo služil kot osnova za to magistrsko delo.
+
+Kot alternativo klasičnim metodam so Hermann et al.~\cite{hermann2014} razvili algoritme, ki temeljijo na vokselizaciji prostora. Ti algoritmi omogočajo hitro preverjanje prostorske zasedenosti, vendar lahko pri zelo natančnih analizah izgubijo detajle zaradi diskretizacije prostora.
+
+V delu Niwa in Masuda~\cite{niwa2016} je predstavljen pristop za zaznavanje trkov z metodo globinskih slik, kar izboljša učinkovitost in pravilnost. Ta pristop omogoča zanesljivejše zaznavanje trkov v gostih oblakih točk, vendar ima še vedno veliko časovno in prostorsko zahtevnost.
+
+\section{Obdelava oblakov točk}
+\label{sec:obdelava-oblakov}
+
+Klein in Zachmann~\cite{klein-2004-point} obravnavata zaznavanje trkov s pomočjo implicitnih površin, ustvarjenih iz oblakov točk. Njihov pristop je posebej uporaben pri obdelavi kompleksnih geometrij, vendar je računsko zahteven, kar lahko omejuje uporabo v realnem času.
+
+Avtorji Li et al.~\cite{li2020} pregledajo najnovejše pristope strojnega učenja za obdelavo LiDAR podatkov. Izpostavljajo, kako lahko globoko učenje izboljša zaznavanje in analizo oblakov točk v avtonomnih vozilih, še posebej pri neenakomernih in šumnih podatkih. Kljub napredku se metode soočajo z izzivi pri obdelavi velikih oblakov točk in zagotavljanjem rezultatov v realnem času, kar omejuje njihovo uporabnost v hitro spreminjajočih se okoljih.
+
+\section{Metode prostorskega indeksiranja}
+\label{sec:prostorsko-indeksiranje}
+
+Prostorsko indeksiranje je ključno za učinkovito obdelavo velikih oblakov točk. K-d drevesa, kot jih uporabljajo Schauer in Nüchter~\cite{Schauer2014}, omogočajo hitro iskanje najbližjih sosedov v večdimenzionalnih prostorih. Te strukture podatkov so posebej primerne za aplikacije, kjer je potrebno pogosto iskanje točk v določeni okolici.
+
+Vendar pa tradicionalne metode prostorskega indeksiranja pogosto niso optimalne za dinamične scenarije, kjer se objekti gibljejo skozi prostor. V takšnih primerih je potreben pristop, ki upošteva časovno komponento gibanja.
+
+\section{Analitično modeliranje v železniškem prometu}
+\label{sec:analiticno-modeliranje}
+
+Everett et al.~\cite{Everett_2021} predstavijo sistem za izogibanje trkom v dinamičnih okoljih z uporabo globokega spodbujevalnega učenja. Prednost tega pristopa je prilagodljivost za različne scenarije in obdelava spremenljivega števila agentov brez strogih predpostavk o njihovem gibanju. Kljub temu metoda manj poudarja analizo geometrijskih lastnosti, kar jo omejuje pri natančnih prostorskih analizah, kot je analiza trkov med vlakom in predorom, zaradi česar je njena uporaba v tem kontekstu manj primerna.
+
+\section{Prehodne krivulje v železniškem prometu}
+\label{sec:prehodne-krivulje}
+
+V železniškem prometu so prehodne krivulje ključne za zagotavljanje gladkega prehoda med ravnimi in ukrivljenimi odseki prog. Brustad in Dalmo~\cite{infrastructures5050043} analizirajo prehodne krivulje, ki omogočajo gladek prehod med ravnimi in ukrivljenimi odseki železniških tirov. Glavna prednost teh krivulj je njihova sposobnost zmanjšanja sil in obrabe vozil ter tirnic, kar povečuje udobje potnikov in zmanjšuje stroške vzdrževanja. Kljub temu se raziskave na tem področju še vedno soočajo z izzivi, kot so določanje optimalnih lastnosti krivulj za različne scenarije in vozne profile.
+
+Jiang et al.~\cite{s24134403} predlagajo uporabo paraboličnih in sinusoidnih prehodnih krivulj za zmanjšanje dolgovalovnih nepravilnosti v vertikalnih profilih tirov. Prednost tega pristopa je zmanjšanje pospeškov pri prehodih, kar izboljša stabilnost vlaka in varnost potnikov. Slabost pa je, da metoda zahteva precizno načrtovanje in prilagoditev specifičnim konstrukcijskim zahtevam, kar lahko poveča začetne stroške implementacije.
+
+\section{Primerjava obstoječih pristopov}
+\label{sec:primerjava-pristopov}
+
+Iz zgoraj predstavljenih del je razvidno, da večina obstoječih metod bodisi zanemarja dinamične lastnosti gibanja bodisi ne omogoča učinkovitega prilagajanja različnim geometrijam. Metode, ki temeljijo na obdelavi oblakov točk~\cite{Schauer2014, niwa2016}, so računsko zahtevne in pogosto niso primerne za analizo v realnem času. Po drugi strani pristopi strojnega učenja~\cite{li2020, Everett_2021} omogočajo prilagodljivost, vendar ne zagotavljajo teoretično podprtih rezultatov, ki so potrebni za varnostno kritične aplikacije v železniškem prometu.
+
+Cilj te magistrske naloge je preseči omejitve obstoječih pristopov z vključitvijo analitičnega modeliranja gibanja kritičnih točk in prekrivanjem teh krivulj z geometrijo predora, kar bo omogočilo natančnejše in hitrejše zaznavanje trkov.
+
+%----------------------------------------------------------------
+% Poglavje (Chapter) 3
+%----------------------------------------------------------------
+\chapter{Teoretične osnove}
+\label{ch:teoreticne-osnove}
+
+\section{Geometrijska predstavitev predorov in vlakov}
+\label{sec:geometrijska-predstavitev}
+
+\section{Matematično modeliranje krivulj}
+\label{sec:modeliranje-krivulj}
+
+\subsection{B-zlepki (B-splines)}
+\label{subsec:b-zlepki}
+
+\subsection{Parametrične krivulje}
+\label{subsec:parametricne-krivulje}
+
+\section{Transformacije v 3D prostoru}
+\label{sec:transformacije-3d}
+
+\subsection{Rotacije in translacije}
+\label{subsec:rotacije-translacije}
+
+\subsection{Koordinatni sistemi}
+\label{subsec:koordinatni-sistemi}
+
+\section{Algoritmi za zaznavanje trkov}
+\label{sec:algoritmi-zaznavanje}
+
+%----------------------------------------------------------------
+% Poglavje (Chapter) 4
+%----------------------------------------------------------------
+\chapter{Metodologija in pristop}
+\label{ch:metodologija}
+
+\section{Pregled predlaganega pristopa}
+\label{sec:pregled-pristopa}
+
+Pri magistrski nalogi se osredotočam na pristop k zaznavanju trkov med vlakom in predorom, ki vključuje več korakov. Kot vhodni podatki se uporabljajo oblaki točk predora, pridobljeni s 3D laserskim skenerjem, ter kontrolne točke, ki definirajo pot železniške proge.
+
+Metodologija vključuje obdelavo oblakov točk predora s transformacijo vzdolž ukrivljene poti, generiranje horizontalnih prerezov predora z B-zlepki za reprezentacijo sten, modeliranje vagona kot kvadra ter simulacijo gibanja vagona vzdolž kontrolnih točk. Med simulacijo se izvaja zaznavanje trkov s preverjanjem razdalj med kritičnimi točkami vagona in stenami predora z določenim varnostnim odmikom.
+
+Sistem je implementiran v programskem jeziku Python z uporabo knjižnic PyVista za vizualizacijo, NumPy za numerične izračune in SciPy za interpolacijo z B-zlepki.
+
+
+\section{Predobdelava vhodnih podatkov}
+\label{sec:predobdelava}
+
+\subsection{Obdelava oblakov točk predora}
+\label{subsec:obdelava-oblakov-predor}
+
+\subsection{Modeliranje vagona}
+\label{subsec:modeliranje-vagona}
+
+\section{Generiranje kontrolnih točk}
+\label{sec:generiranje-kontrolnih}
+
+\section{Analitično modeliranje gibanja}
+\label{sec:analiticno-modeliranje-gibanja}
+
+\subsection{Določitev kritičnih točk vagona}
+\label{subsec:kriticne-tocke}
+
+\subsection{Izračun krivulj gibanja}
+\label{subsec:krivulje-gibanja}
+
+\section{Zaznavanje trkov}
+\label{sec:zaznavanje-trkov-metodologija}
+
+%----------------------------------------------------------------
+% Poglavje (Chapter) 5
+%----------------------------------------------------------------
+\chapter{Implementacija}
+\label{ch:implementacija}
+
+\section{Arhitektura sistema}
+\label{sec:arhitektura}
+
+\section{Ključni moduli implementacije}
+\label{sec:kljucni-moduli}
+
+\subsection{TunnelSlicer -- obdelava geometrije predora}
+\label{subsec:tunnel-slicer}
+
+\subsection{TrainGenerator -- modeliranje vlaka}
+\label{subsec:train-generator}
+
+\subsection{CollisionDetector -- zaznavanje trkov}
+\label{subsec:collision-detector}
+
+\subsection{Simulation -- simulacija gibanja}
+\label{subsec:simulation}
+
+\section{B-zlepki za stene predora}
+\label{sec:b-zlepki-stene}
+
+\section{Transformacije koordinatnih sistemov}
+\label{sec:transformacije-koordinatni}
+
+\section{Simulacija gibanja vagona}
+\label{sec:simulacija-gibanja}
+
+%----------------------------------------------------------------
+% Poglavje (Chapter) 6
+%----------------------------------------------------------------
+\chapter{Eksperimentalno ovrednotenje}
+\label{ch:eksperimentalno-ovrednotenje}
+
+\section{Testni scenariji in podatki}
+\label{sec:testni-scenariji}
+
+\subsection{Predor Ringo}
+\label{subsec:predor-ringo}
+
+\subsection{Predor Globoko}
+\label{subsec:predor-globoko}
+
+\section{Evalvacijski kriteriji}
+\label{sec:evalvacijski-kriteriji}
+
+Evalvacija sistema je bila izvedena z analizo delovanja na dveh testnih scenarijih. Preverjalo se je pravilno zaznavanje kršitev varnostnih razdalj, stabilnost sistema med simulacijo ter ustreznost vizualizacije rezultatov. Sistem je uspešno zaznal situacije, kjer se vagon približa preblizu stenam predora ali presega dovoljene meje predora.
+
+
+\section{Rezultati testiranja}
+\label{sec:rezultati-testiranja}
+
+\subsection{Natančnost zaznavanja trkov}
+\label{subsec:natancnost-zaznavanja}
+
+\subsection{Računska učinkovitost}
+\label{subsec:racunska-ucinkovitost}
+
+\subsection{Analiza varnostnih razdalj}
+\label{subsec:analiza-varnostnih}
+
+\section{Primerjava z obstoječimi metodami}
+\label{sec:primerjava-metode}
+
+\section{Diskusija rezultatov}
+\label{sec:diskusija-rezultatov}
+
+%----------------------------------------------------------------
+% Poglavje (Chapter) 7
+%----------------------------------------------------------------
+\chapter{Sklepne ugotovitve}
+\label{ch:sklepne-ugotovitve}
+
+\section{Povzetek prispevkov}
+\label{sec:povzetek-prispevkov}
+
+\section{Omejitve pristopa}
+\label{sec:omejitve}
+
+\section{Predlogi za nadaljnje delo}
+\label{sec:predlogi-nadaljnje}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 % ---------------------------------------------------------------
 % Appendix
@@ -286,21 +558,6 @@ Example of the appendix.
 % SLO: odkomentiraj za uporabo zunanje datoteke .bib (ne pozabi je potem prevesti!)
 % ENG: uncomment to use .bib file (don't forget to compile it!)
 %----------------------------------------------------------------
-%\bibliography{bibliography}
-
-%----------------------------------------------------------------
-% SLO: zakomentiraj spodnji del, če uporabljaš zunanjo .bib datoteko
-% ENG: comment the part below if using the .bib file
-%----------------------------------------------------------------
-
-\begin{thebibliography}{99}
-\bibitem{Fortnow} L.\ Fortnow, ``Viewpoint: Time for computer science to grow up'',
-{\it Communications of the ACM}, št.\ 52, zv.\ 8, str.\ 33--35, 2009.
-\bibitem{Knuth} D.\ E.\ Knuth, P. Bendix. ``Simple word problems in universal algebras'', v zborniku: Computational Problems in Abstract Algebra (ur. J. Leech), 1970, str. 263--297.
-\bibitem{Lamport} L.\ Lamport. {\it LaTEX: A Document Preparation System}. Addison-Wesley, 1986.
-\bibitem{ubi} O.\ Patashnik (1998) \BibTeX{}ing.
-Dostopno na: \url{http://ftp.univie.ac.at/packages/tex/biblio/bibtex/contrib/doc/btxdoc.pdf}
-\bibitem{licence} licence-cc.pdf. Dostopno na: \url{https://ucilnica.fri.uni-lj.si/course/view.php?id=274}
-\end{thebibliography}
+\bibliography{bibliography}
 
 \end{document}
