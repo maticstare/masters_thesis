@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 \expandafter\ifx\csname url\endcsname\relax
   \def\url#1{\texttt{#1}}\fi
 \expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
@@ -68,5 +68,24 @@ L.~Jiang, Y.~Li, Y.~Zhao, M.~Cen,
 \newblock \href {https://doi.org/10.3390/s24134403}
   {\path{doi:10.3390/s24134403}}.
 \newline\urlprefix\url{https://www.mdpi.com/1424-8220/24/13/4403}
+
+\bibitem{DAI2015144}
+J.~S. Dai,
+  \href{https://www.sciencedirect.com/science/article/pii/S0094114X15000415}{Euler–rodrigues
+  formula variations, quaternion conjugation and intrinsic connections},
+  Mechanism and Machine Theory 92 (2015) 144--152.
+\newblock \href
+  {https://doi.org/https://doi.org/10.1016/j.mechmachtheory.2015.03.004}
+  {\path{doi:https://doi.org/10.1016/j.mechmachtheory.2015.03.004}}.
+\newline\urlprefix\url{https://www.sciencedirect.com/science/article/pii/S0094114X15000415}
+
+\bibitem{b_splines}
+M.~S. Hasan, M.~N. Alam, M.~Fayz-Al-Asad, N.~Muhammad, C.~Tunç,
+  \href{https://doi.org/10.1515/nleng-2024-0054}{B-spline curve theory: An
+  overview and applications in real life}, Nonlinear Engineering 13~(1) (2024)
+  20240054 [cited 2025-08-16].
+\newblock \href {https://doi.org/doi:10.1515/nleng-2024-0054}
+  {\path{doi:doi:10.1515/nleng-2024-0054}}.
+\newline\urlprefix\url{https://doi.org/10.1515/nleng-2024-0054}
 
 \end{thebibliography}

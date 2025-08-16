@@ -277,10 +277,10 @@ Izbira \LaTeX\ ali ne \LaTeX\ je seveda prepuščena vam samim. Res je, da so pr
 % Poglavje (Chapter) 1
 %----------------------------------------------------------------
 \chapter{Uvod}
-\label{ch:uvod}
+\label{ch:uvod}%solid
 
 \section{Opis problema}
-\label{sec:opis-problema}
+\label{sec:opis-problema}%solid
 
 V železniškem prometu je zagotavljanje varnosti v predorih ključnega pomena, še posebej pri dolgi in široki tovorni kompoziciji, ki se giblje skozi ozke in ukrivljene predore. Problem, ki ga obravnavam v tej magistrski nalogi, je zaznavanje morebitnih trkov med vlakom in stenami predora, ki nastanejo zaradi nepravilnega sledenja predpisanemu varnostnemu prostoru ali napak v modeliranju geometrije predora.
 
@@ -288,7 +288,7 @@ Klasične metode, kot je uporaba minimalnega prereza, so v takšnih scenarijih n
 
 
 \section{Motivacija in cilji dela}
-\label{sec:motivacija-cilji}
+\label{sec:motivacija-cilji}%solid
 
 Motivacija za delo izhaja iz realnega izziva, ki sem ga prejel od podjetja Slovenske železnice. Ti so izrazili potrebo po razvoju avtomatiziranega sistema, ki bi omogočil natančno zaznavanje trkov med vlakom in predorom. 
 
@@ -299,7 +299,7 @@ Naloga se umešča na področje računalniškega modeliranja in analize v prosto
 
 
 \section{Prispevki magistrske naloge}
-\label{sec:prispevki}
+\label{sec:prispevki}%solid
 
 Magistrska naloga bo prispevala k razvoju sistema za zaznavanje trkov med vlakom in predorom s simulacijo gibanja vlaka. V primerjavi z obstoječimi metodami, ki temeljijo na statični analizi minimalnih prerezov, predlagana rešitev omogoča dinamično simulacijo gibanja in kontinuirano preverjanje varnostnih razdalj.
 
@@ -315,17 +315,17 @@ Novost naloge je v integraciji obdelave oblakov točk predora z analitičnim mod
 
 
 \section{Struktura magistrske naloge}
-\label{sec:struktura}
+\label{sec:struktura}%TODO
 
 
 %----------------------------------------------------------------
 % Poglavje (Chapter) 2
 %----------------------------------------------------------------
 \chapter{Pregled sorodnih del}
-\label{ch:pregled-sorodnih-del}
+\label{ch:pregled-sorodnih-del}%solid
 
 \section{Zaznavanje trkov v prostoru}
-\label{sec:zaznavanje-trkov}
+\label{sec:zaznavanje-trkov}%solid
 
 Na področju zaznavanja trkov v prostoru se pogosto uporabljajo metode, ki temeljijo na analizi oblakov točk in algoritmih prostorskega indeksiranja. Ena izmed najpogosteje uporabljenih tehnik je uporaba k-d dreves za učinkovito iskanje sosednjih točk v prostoru, kot je prikazano v delu Schauerja in Nüchterja~\cite{Schauer2014}. Prednost njihovega pristopa je visoka računska učinkovitost pri analizi oblakov točk velikega obsega. Ker pa je točk zelo veliko, se poraja potreba po bolj pametnih izračunih trkov. Njihov članek bo služil kot osnova za to magistrsko delo.
 
@@ -334,14 +334,14 @@ Kot alternativo klasičnim metodam so Hermann et al.~\cite{hermann2014} razvili 
 V delu Niwa in Masuda~\cite{niwa2016} je predstavljen pristop za zaznavanje trkov z metodo globinskih slik, kar izboljša učinkovitost in pravilnost. Ta pristop omogoča zanesljivejše zaznavanje trkov v gostih oblakih točk, vendar ima še vedno veliko časovno in prostorsko zahtevnost.
 
 \section{Obdelava oblakov točk}
-\label{sec:obdelava-oblakov}
+\label{sec:obdelava-oblakov}%solid
 
 Klein in Zachmann~\cite{klein-2004-point} obravnavata zaznavanje trkov s pomočjo implicitnih površin, ustvarjenih iz oblakov točk. Njihov pristop je posebej uporaben pri obdelavi kompleksnih geometrij, vendar je računsko zahteven, kar lahko omejuje uporabo v realnem času.
 
 Avtorji Li et al.~\cite{li2020} pregledajo najnovejše pristope strojnega učenja za obdelavo LiDAR podatkov. Izpostavljajo, kako lahko globoko učenje izboljša zaznavanje in analizo oblakov točk v avtonomnih vozilih, še posebej pri neenakomernih in šumnih podatkih. Kljub napredku se metode soočajo z izzivi pri obdelavi velikih oblakov točk in zagotavljanjem rezultatov v realnem času, kar omejuje njihovo uporabnost v hitro spreminjajočih se okoljih.
 
 \section{Metode prostorskega indeksiranja}
-\label{sec:prostorsko-indeksiranje}
+\label{sec:prostorsko-indeksiranje}%solid
 
 Prostorsko indeksiranje je ključno za učinkovito obdelavo velikih oblakov točk. K-d drevesa, kot jih uporabljajo Schauer in Nüchter~\cite{Schauer2014}, omogočajo hitro iskanje najbližjih sosedov v večdimenzionalnih prostorih. Te strukture podatkov so posebej primerne za aplikacije, kjer je potrebno pogosto iskanje točk v določeni okolici.
 
@@ -353,18 +353,21 @@ Vendar pa tradicionalne metode prostorskega indeksiranja pogosto niso optimalne 
 Everett et al.~\cite{Everett_2021} predstavijo sistem za izogibanje trkom v dinamičnih okoljih z uporabo globokega spodbujevalnega učenja. Prednost tega pristopa je prilagodljivost za različne scenarije in obdelava spremenljivega števila agentov brez strogih predpostavk o njihovem gibanju. Kljub temu metoda manj poudarja analizo geometrijskih lastnosti, kar jo omejuje pri natančnih prostorskih analizah, kot je analiza trkov med vlakom in predorom, zaradi česar je njena uporaba v tem kontekstu manj primerna.
 
 \section{Prehodne krivulje v železniškem prometu}
-\label{sec:prehodne-krivulje}
+\label{sec:prehodne-krivulje}%solid
 
 V železniškem prometu so prehodne krivulje ključne za zagotavljanje gladkega prehoda med ravnimi in ukrivljenimi odseki prog. Brustad in Dalmo~\cite{infrastructures5050043} analizirajo prehodne krivulje, ki omogočajo gladek prehod med ravnimi in ukrivljenimi odseki železniških tirov. Glavna prednost teh krivulj je njihova sposobnost zmanjšanja sil in obrabe vozil ter tirnic, kar povečuje udobje potnikov in zmanjšuje stroške vzdrževanja. Kljub temu se raziskave na tem področju še vedno soočajo z izzivi, kot so določanje optimalnih lastnosti krivulj za različne scenarije in vozne profile.
 
 Jiang et al.~\cite{s24134403} predlagajo uporabo paraboličnih in sinusoidnih prehodnih krivulj za zmanjšanje dolgovalovnih nepravilnosti v vertikalnih profilih tirov. Prednost tega pristopa je zmanjšanje pospeškov pri prehodih, kar izboljša stabilnost vlaka in varnost potnikov. Slabost pa je, da metoda zahteva precizno načrtovanje in prilagoditev specifičnim konstrukcijskim zahtevam, kar lahko poveča začetne stroške implementacije.
 
 \section{Primerjava obstoječih pristopov}
-\label{sec:primerjava-pristopov}
+\label{sec:primerjava-pristopov}%solid
 
 Iz zgoraj predstavljenih del je razvidno, da večina obstoječih metod bodisi zanemarja dinamične lastnosti gibanja bodisi ne omogoča učinkovitega prilagajanja različnim geometrijam. Metode, ki temeljijo na obdelavi oblakov točk~\cite{Schauer2014, niwa2016}, so računsko zahtevne in pogosto niso primerne za analizo v realnem času. Po drugi strani pristopi strojnega učenja~\cite{li2020, Everett_2021} omogočajo prilagodljivost, vendar ne zagotavljajo teoretično podprtih rezultatov, ki so potrebni za varnostno kritične aplikacije v železniškem prometu.
 
 Cilj te magistrske naloge je preseči omejitve obstoječih pristopov z vključitvijo analitičnega modeliranja gibanja kritičnih točk in prekrivanjem teh krivulj z geometrijo predora, kar bo omogočilo natančnejše in hitrejše zaznavanje trkov.
+
+
+
 
 %----------------------------------------------------------------
 % Poglavje (Chapter) 3
@@ -372,29 +375,201 @@ Cilj te magistrske naloge je preseči omejitve obstoječih pristopov z vključit
 \chapter{Teoretične osnove}
 \label{ch:teoreticne-osnove}
 
-\section{Geometrijska predstavitev predorov in vlakov}
-\label{sec:geometrijska-predstavitev}
+V tem poglavju predstavimo teoretične osnove, ki so potrebne za razumevanje predlaganega pristopa k zaznavanju trkov med vlakom in predorom. Osredotočimo se na geometrijsko predstavitev objektov v prostoru, matematične osnove B-zlepkov ter algoritme za zaznavanje trkov.
 
-\section{Matematično modeliranje krivulj}
-\label{sec:modeliranje-krivulj}
+\section{Geometrijska predstavitev predorov}
+\label{sec:geometrijska-predstavitev-predorov}%solid
 
-\subsection{B-zlepki (B-splines)}
-\label{subsec:b-zlepki}
+Predori so predstavljeni z oblaki točk, pridobljenih s 3D laserskim skenerjem. Oblak točk predstavlja diskretno vzorčenje površine predora, kjer vsaka točka $\boldsymbol{p}_i = (x_i, y_i, z_i)$ določa prostorsko pozicijo na steni predora. Oblak točk $\mathcal{P} = \{\boldsymbol{p}_1, \boldsymbol{p}_2, \ldots, \boldsymbol{p}_n\}$ vsebuje $n$ točk, ki skupaj opisujejo geometrijo predora.
 
-\subsection{Parametrične krivulje}
-\label{subsec:parametricne-krivulje}
+V našem pristopu obravnavamo podatke predorov, ki so organizirani kot zaporedni prečni prerezi vzdolž osi predora. Vsak presek je definiran z množico 2D koordinat $(x, y)$, ki opisujejo obris predora na določeni poziciji vzdolž osi $z$.
 
-\section{Transformacije v 3D prostoru}
-\label{sec:transformacije-3d}
+Glavni izziv pri obdelavi takšnih podatkov je njihova transformacija v uporaben 3D oblak točk, ki ohranja geometrijske lastnosti predora. To dosežemo z naslednjim pristopom:
 
-\subsection{Rotacije in translacije}
-\label{subsec:rotacije-translacije}
+\begin{itemize}
+    \item \textbf{Postavitev oblaka točk v 3D}: 2D koordinate $(x, y)$ za vsak presek dopolnimo z $z$ koordinato, ki ustreza poziciji vzdolž poti
+    \item \textbf{Transformacija koordinatnega sistema}: podatki se transformirajo iz globalnega koordinatnega sistema v lokalni koordinatni sistem predora, kjer $z$-os sovpada s središčno linijo predora
+\end{itemize}
 
-\subsection{Koordinatni sistemi}
-\label{subsec:koordinatni-sistemi}
+Matematična formulacija transformacije je podana z:
 
-\section{Algoritmi za zaznavanje trkov}
-\label{sec:algoritmi-zaznavanje}
+\begin{equation}
+\boldsymbol{p}'_i = \boldsymbol{R}(\boldsymbol{p}_i - \boldsymbol{t}_{\text{center}})
+\label{eq:coordinate-transform}
+\end{equation}
+
+kjer je $\boldsymbol{R}$ rotacijska matrika, izpeljana iz tangentnega vektorja središčne linije, $\boldsymbol{t}_{\text{center}}$ pa translacijski vektor do središča predora. 
+
+Za konstrukcijo rotacijske matrike $\boldsymbol{R}$ uporabimo Rodriguesovo rotacijsko formulo~\cite{DAI2015144}:
+
+\begin{equation}
+\boldsymbol{R} = \boldsymbol{I} + \sin(\theta) \boldsymbol{K} + (1 - \cos(\theta)) \boldsymbol{K}^2
+\end{equation}
+
+kjer je $\theta$ kot med vektorjema, $\boldsymbol{K}$ pa antisimetrična matrika osi rotacije. Namen te transformacije je prilagoditi oblak točk dejanskemu poteku predora v prostoru. Ker so prvotni podatki organizirani kot ravni prerezi, rotacijska transformacija zagotovi, da se oblak točk čim bolje prilega dejanski ukrivljeni geometriji predora. To je ključno za natančno predstavitev prostorskih odnosov med vlakom in stenami predora ter posledično za zanesljivo zaznavanje trkov.
+
+\section{Geometrijski model vagona}
+\label{sec:geometrijski-model-vagona}
+
+Vagon je modeliran kot pravokotno telo (kvader) z dimenzijami širina $w$, višina $h$ in globina $d$. Geometrijska predstavitev temelji na konceptu medosne razdalje in ortogonalnem koordinatnem sistemu.
+
+\subsection{Pozicioniranje z medosno razdaljo}%solid
+\label{subsec:pozicioniranje-medosje}
+
+Pozicija vagona je določena s točkama $\boldsymbol{p}_0$ in $\boldsymbol{p}_1$, ki sta oddaljeni za medosno razdaljo $l_{wb}$. Za določitev sprednje osi uporabljamo metodo presečišča kroga in krivulje.
+
+Sprednja os $\boldsymbol{p}_1$ se nahaja na presečišču kroga s središčem v $\boldsymbol{p}_0$ in radijem $l_{wb}$ z B-zlepkem kontrolnih točk:
+
+\begin{equation}
+\|\boldsymbol{C}(t) - \boldsymbol{p}_0\|^2 = l_{wb}^2
+\label{eq:circle-curve-intersection}
+\end{equation}
+
+kjer je $\boldsymbol{C}(t)$ parametrična predstavitev B-zlepka kontrolnih točk in $t \in [0,1]$ parameter krivulje.
+
+Za rešitev te enačbe iščemo ničle funkcije:
+
+\begin{equation}
+f(t) = \|\boldsymbol{C}(t) - \boldsymbol{p}_0\|^2 - l_{wb}^2
+\label{eq:intersection-function}
+\end{equation}
+
+Ta pristop zagotavlja, da je medosna razdalja natančno ohranjena tudi na ukrivljenih odsekih poti, kar je ključno za realistično modeliranje gibanja vagona.
+
+\subsection{Ortogonalni koordinatni sistem}%solid
+\label{subsec:ortogonalni-sistem-vagon}
+
+Orientacija vagona v prostoru je določena z ortogonalnim koordinatnim sistemom:
+
+\begin{align}
+\boldsymbol{f} &= \frac{\boldsymbol{p}_1 - \boldsymbol{p}_0}{\|\boldsymbol{p}_1 - \boldsymbol{p}_0\|} \quad \text{(naprej)} \\
+\boldsymbol{u} &= (0, 1, 0) \quad \text{(navzgor)} \\
+\boldsymbol{r} &= \boldsymbol{u} \times \boldsymbol{f} \quad \text{(desno)}
+\label{eq:wagon-frame}
+\end{align}
+
+\subsection{Simulacija premika vagona}%solid
+\label{subsec:simulacija-premika-vagona}
+
+Za potrebe simulacije gibanja vagona je potrebno določiti celoten geometrijski model, ki omogoča natančno predstavitev vagona v prostoru. Vagon je modeliran z osmimi vogali pravokotnega telesa, ki se izračunajo na podlagi dejanskih mej vagona.
+
+Najprej definirajmo sprednjo in zadnjo mejo vagona:
+
+\begin{align}
+\boldsymbol{p}_{\text{rear}} &= \boldsymbol{p}_0 - \boldsymbol{f} \cdot (d \cdot \omega) \\
+\boldsymbol{p}_{\text{front}} &= \boldsymbol{p}_0 + \boldsymbol{f} \cdot (d \cdot (1 - \omega))
+\label{eq:wagon-actual-ends}
+\end{align}
+
+kjer je $\omega$ parameter odmika koles, $d$ globina vagona in $\boldsymbol{f}$ enotski vektor v smeri naprej.
+
+Osem vogalov vagona je nato definiranih kot:
+
+\begin{equation}
+\boldsymbol{v}_{i,j,k} = \boldsymbol{p}_{\text{base}} + i \cdot \frac{w}{2} \boldsymbol{r} + j \cdot h \cdot \boldsymbol{u} + k \cdot \frac{d}{2} \cdot \boldsymbol{f}
+\label{eq:wagon-vertices}
+\end{equation}
+
+kjer so $i, k \in \{-1, 1\}$, $j \in \{0, 1\}$ in $\boldsymbol{p}_{\text{base}} = \frac{\boldsymbol{p}_{\text{rear}} + \boldsymbol{p}_{\text{front}}}{2}$ je središče med zadnjo in sprednjo mejo vagona.
+
+Ta pristop omogoča popolno geometrijsko predstavitev vagona v prostoru ter je ključen za vizualizacijo in analizo gibanja celotne strukture vagona vzdolž ukrivljene poti.
+
+\subsection{Kritične točke za računanje trkov}%solid
+\label{subsec:kriticne-tocke-racunanje-trkov}
+
+Za učinkovito zaznavanje trkov se na vsaki višinski ravnini $y$ v predoru uporablja optimiziran nabor šestih kritičnih točk, ki predstavljajo najkritičnejše pozicije za možne kolizije s stenami. Te točke so razporejene v treh vzdolžnih pozicijah (zadaj, sredina, spredaj) na obeh stranskih robovih vagona.
+
+Kritične točke za zaznavanje kolizij na višini $y$ so definirane s formulo:
+
+\begin{equation}
+\boldsymbol{c}_{s,p} = \boldsymbol{p}_{base,p} + s \cdot \frac{w}{2} \boldsymbol{r} + y \cdot \boldsymbol{u}
+\label{eq:critical-points-wagon}
+\end{equation}
+
+kjer je:
+\begin{align}
+s &\in \{-1, 1\} \quad \text{(levo/desno)} \nonumber \\
+p &\in \{\text{back}, \text{middle}, \text{front}\} \quad \text{(zadaj, sredina, spredaj)} \nonumber \\
+\boldsymbol{p}_{base,back} &= \boldsymbol{p}_{\text{rear}} \nonumber \\
+\boldsymbol{p}_{base,middle} &= \frac{\boldsymbol{p}_{\text{rear}} + \boldsymbol{p}_{\text{front}}}{2} \nonumber \\
+\boldsymbol{p}_{base,front} &= \boldsymbol{p}_{\text{front}} \nonumber
+\end{align}
+
+kjer je $\boldsymbol{r}$ enotski vektor v desno smer, $\boldsymbol{u}$ enotski vektor navzgor in $w$ širina vagona.
+
+Ta pristop generira za vsako horizontalno ravnino predora (definirano z $y$ koordinato) natanko šest kritičnih točk, ki pokrivajo celotno širino in dolžino vagona. Sistematična razporeditev omogoča zanesljivo zaznavanje kršitev varnostnih razdalj ali situacij, kjer bi se vagon nahajal zunaj dovoljenih mej predora.
+
+
+
+
+\section{B-zlepki (B-splines)}
+\label{sec:b-zlepki}
+
+B-zlepki so parametrične krivulje, ki omogočajo gladko interpolacijo ali aproksimacijo množice točk. V našem sistemu jih uporabljamo za reprezentacijo sten predora ter za modeliranje poti vagona.
+
+\subsection{Matematične osnove B-zlepkov}
+\label{subsec:matematicne-osnove-b-zlepkov}
+
+B-zlepek stopnje $p$~\cite{b_splines} je definiran s kontrolnimi točkami $\boldsymbol{C}_0, \boldsymbol{C}_1, \ldots, \boldsymbol{C}_n$ in vozliščnim vektorjem $\boldsymbol{t} = \{t_0, t_1, \ldots, t_{n+p+1}\}$:
+
+\begin{equation}
+\boldsymbol{S}(y) = \sum_{i=0}^{n} \boldsymbol{C}_i B_{i,p}(y)
+\label{eq:b-spline}
+\end{equation}
+
+kjer so $B_{i,p}(y)$ B-zlepek bazne funkcije, definirane rekurzivno:
+
+\begin{align}
+B_{i,0}(y) &= \begin{cases}
+1 & \text{če } t_i \leq y < t_{i+1} \\
+0 & \text{sicer}
+\end{cases} \\
+B_{i,p}(y) &= \frac{y - t_i}{t_{i+p} - t_i} B_{i,p-1}(y) + \frac{t_{i+p+1} - y}{t_{i+p+1} - t_{i+1}} B_{i+1,p-1}(y).
+\label{eq:b-spline-basis}
+\end{align}
+
+
+\subsection{Interpolacija in aproksimacija}
+\label{subsec:interpolacija-aproksimacija}
+
+Pri obdelavi oblakov točk predora uporabljamo dva pristopa:
+
+\textbf{Interpolacija}: B-zlepek natančno prehaja skozi vse podane točke. To je ustrezno, ko želimo ohraniti vse detajle geometrije predora.
+
+\textbf{Aproksimacija}: B-zlepek se prilagodi splošni obliki podatkov, vendar ne prehaja natančno skozi vse točke. To je koristno za zmanjšanje vpliva šuma v meritvah.
+
+
+
+\section{Metode za merjenje razdalj in določanje strani}
+\label{sec:metode-razdalj}
+
+Za zaznavanje trkov je ključno merjenje razdalj med točkami vagona in stenami predora ter določanje, na kateri strani B-zlepka se točka nahaja.
+
+\subsection{Razdalja do parametrične krivulje}
+\label{subsec:razdalja-krivulja}
+
+Razdalja med točko $\boldsymbol{q}$ in B-zlepkom $\boldsymbol{C}(u)$ je definirana kot:
+
+\begin{equation}
+d(\boldsymbol{q}, \boldsymbol{C}) = \min_{u \in [0,1]} \|\boldsymbol{q} - \boldsymbol{C}(u)\|
+\label{eq:distance-spline}
+\end{equation}
+
+To je optimizacijski problem, ki ga rešujemo numerično z iskanjem najbližje točke na krivulji.
+
+\subsection{Določanje strani}
+\label{subsec:dolocanje-strani}
+
+Za določitev, ali se točka nahaja znotraj ali zunaj predora, uporabljamo predznak razdalje. Za 2D preseku predora uporabimo vektorski produkt za določitev strani:
+
+\begin{equation}
+s = \text{sign}(\boldsymbol{t} \times (\boldsymbol{q} - \boldsymbol{C}(u^*)))
+\label{eq:side-determination}
+\end{equation}
+
+kjer pozitivni predznak pomeni, da je točka na levi strani krivulje, negativni pa na desni.
+
+
 
 %----------------------------------------------------------------
 % Poglavje (Chapter) 4
@@ -409,7 +584,7 @@ Pri magistrski nalogi se osredotočam na pristop k zaznavanju trkov med vlakom i
 
 Metodologija vključuje obdelavo oblakov točk predora s transformacijo vzdolž ukrivljene poti, generiranje horizontalnih prerezov predora z B-zlepki za reprezentacijo sten, modeliranje vagona kot kvadra ter simulacijo gibanja vagona vzdolž kontrolnih točk. Med simulacijo se izvaja zaznavanje trkov s preverjanjem razdalj med kritičnimi točkami vagona in stenami predora z določenim varnostnim odmikom.
 
-Sistem je implementiran v programskem jeziku Python z uporabo knjižnic PyVista za vizualizacijo, NumPy za numerične izračune in SciPy za interpolacijo z B-zlepki.
+Sistem je implementiran v programskem jeziku Python z uporabo knjižnic PyVista za vizualizacijo, NumPy za numerične izračune in SciPy za interpolacijo z B-zlepkami.
 
 
 \section{Predobdelava vhodnih podatkov}
@@ -421,11 +596,17 @@ Sistem je implementiran v programskem jeziku Python z uporabo knjižnic PyVista 
 \subsection{Modeliranje vagona}
 \label{subsec:modeliranje-vagona}
 
+\subsection{Obdelava kontrolnih točk}
+\label{subsec:obdelava-kontrolnih-tock}
+
 \section{Generiranje kontrolnih točk}
 \label{sec:generiranje-kontrolnih}
 
-\section{Analitično modeliranje gibanja}
-\label{sec:analiticno-modeliranje-gibanja}
+\section{Modeliranje gibanja vagona}
+\label{sec:modeliranje-gibanja-vagona}
+
+\subsection{Izračun pozicije na osnovi medosne razdalje}
+\label{subsec:izracun-pozicije-medosje}
 
 \subsection{Določitev kritičnih točk vagona}
 \label{subsec:kriticne-tocke}
@@ -433,8 +614,65 @@ Sistem je implementiran v programskem jeziku Python z uporabo knjižnic PyVista 
 \subsection{Izračun krivulj gibanja}
 \label{subsec:krivulje-gibanja}
 
-\section{Zaznavanje trkov}
-\label{sec:zaznavanje-trkov-metodologija}
+\section{Algoritmi za zaznavanje trkov}
+\label{sec:algoritmi-zaznavanje}
+
+Zaznavanje trkov temelji na preverjanju dveh pogojev: ali se kritične točke vagona nahajajo preblizu stenami predora (kršitev varnostnega odmika) ali zunaj predora.
+
+\subsection{Varnostni odmik}
+\label{subsec:varnostni-odmik}
+
+Varnostni odmik $\delta$ predstavlja minimalno dovoljeno razdaljo med vagom in steno predora. Kršitev nastane, ko:
+
+\begin{equation}
+d(\boldsymbol{v}_i, \boldsymbol{C}_{\text{stena}}) < \delta
+\label{eq:safety-violation}
+\end{equation}
+
+kjer je $\boldsymbol{v}_i$ kritična točka vagona in $\boldsymbol{C}_{\text{stena}}$ B-zlepek stene predora.
+
+\subsection{Algoritem zaznavanja}
+\label{subsec:algoritem-zaznavanja}
+
+Glavni algoritem zaznavanja trkov deluje v naslednjih korakih:
+\begin{enumerate}
+    \item Za vsako kritično točko vagona $\boldsymbol{v}_i$
+    \item Izračunaj razdaljo do leve stene $d_L$ in desne stene $d_R$
+    \item Določi, na kateri strani sten se točka nahaja
+    \item Preverti kršitve:
+        \begin{itemize}
+            \item Če $d_L < \delta$ ali $d_R < \delta$: kršitev varnostnega odmika
+            \item Če je točka na napačni strani: zunaj predora
+        \end{itemize}
+\end{enumerate}
+
+
+Psevdokoda algoritma je predstavljena v Algoritmu~\ref{alg:collision-detection}.
+
+\begin{algorithm}
+\caption{Zaznavanje trkov med vagom in predorom}
+\label{alg:collision-detection}
+\begin{algorithmic}[1]
+\footnotesize
+\STATE $\text{violations} \gets \emptyset$
+\FOR{vsako kritično točko $\boldsymbol{v}_i$ vagona}
+    \STATE $d_L \gets$ razdalja od $\boldsymbol{v}_i$ do leve stene
+    \STATE $d_R \gets$ razdalja od $\boldsymbol{v}_i$ do desne stene
+    \STATE $s_L \gets$ stran glede na levo steno
+    \STATE $s_R \gets$ stran glede na desno steno
+    \IF{$d_L < \delta$}
+        \STATE dodaj kršitev: "preblizu levi steni"
+    \ENDIF
+    \IF{$d_R < \delta$}
+        \STATE dodaj kršitev: "preblizu desni steni"
+    \ENDIF
+    \IF{$s_L < 0$ ali $s_R > 0$}
+        \STATE dodaj kršitev: "zunaj predora"
+    \ENDIF
+\ENDFOR
+\RETURN $\text{violations}$
+\end{algorithmic}
+\end{algorithm}
 
 %----------------------------------------------------------------
 % Poglavje (Chapter) 5
@@ -469,6 +707,9 @@ Sistem je implementiran v programskem jeziku Python z uporabo knjižnic PyVista 
 \section{Simulacija gibanja vagona}
 \label{sec:simulacija-gibanja}
 
+\section{Vizualizacija simulatorja}
+\label{sec:vizualizacija}
+
 %----------------------------------------------------------------
 % Poglavje (Chapter) 6
 %----------------------------------------------------------------
@@ -483,6 +724,9 @@ Sistem je implementiran v programskem jeziku Python z uporabo knjižnic PyVista 
 
 \subsection{Predor Globoko}
 \label{subsec:predor-globoko}
+
+\section{Parametri sistema}
+\label{sec:parametri-sistema}
 
 \section{Evalvacijski kriteriji}
 \label{sec:evalvacijski-kriteriji}
@@ -542,11 +786,11 @@ Evalvacija sistema je bila izvedena z analizo delovanja na dveh testnih scenarij
 % ---------------------------------------------------------------
 % Appendix
 % ---------------------------------------------------------------
-\appendix
+%\appendix
 %\addcontentsline{toc}{chapter}{Razširjeni povzetek}
-\chapter{Title of the appendix 1}
+%\chapter{Title of the appendix 1}
 
-Example of the appendix.
+%Example of the appendix.
 
 %----------------------------------------------------------------
 % SLO: bibliografija
