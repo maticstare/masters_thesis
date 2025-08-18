@@ -77,17 +77,6 @@ class Wagon:
         Returns:
             Array of 8 vertices in specific order for PyVista cube
         """
-        """ half_width = self.width / 2
-        return np.array([
-            p0 - right * half_width,                    # rear left bottom
-            p1 - right * half_width,                    # front left bottom
-            p1 - right * half_width + up * self.height, # front left top
-            p0 - right * half_width + up * self.height, # rear left top
-            p0 + right * half_width,                    # rear right bottom
-            p0 + right * half_width + up * self.height, # rear right top
-            p1 + right * half_width + up * self.height, # front right top
-            p1 + right * half_width                     # front right bottom
-        ]) """
         
         # Calculate actual wagon rear and front positions based on p0 and p1
         forward = (p1 - p0) / np.linalg.norm(p1 - p0)

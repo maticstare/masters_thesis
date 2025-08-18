@@ -373,7 +373,7 @@ class TunnelSlicer:
         self._find_b_spline_of_control_points()
 
         # Generate splines on walls at different y values 
-        self._generate_splines_at_y_values(epsilon=5, wall_spline_degree=3, visualize=True)
+        self._generate_splines_at_y_values(epsilon=5, wall_spline_degree=wall_spline_degree, visualize=True)
 
         # Load or create tunnel points
         parquet_path = f"{self.folder_path}/tunnel_pointcloud.parquet"

@@ -91,186 +91,6 @@
 %================================================================
 % ENG: main pages of the thesis
 %================================================================
-\iffalse
-%----------------------------------------------------------------
-% Poglavje (Chapter) 1
-%----------------------------------------------------------------
-\chapter{Uvod}
-%\label{ch:uvod}
-
-Datoteka {\tt magistrska\_naloga.tex} na kratko opisuje, kako se pisanja magistrskega dela lotimo z uporabo programskega pateka \LaTeX. V tem dokumentu bomo predstavili nekaj njegovih prednosti in hib. Kar se slednjih tiče, mi pride na misel ena sama. Ko se srečamo z njim, nam izgleda kot kislo jabolko, nismo prepričani, da bi želeli vanj ugrizniti. Lahko pa z njim pripravimo odličen zavitek ali pa pridemo na okus.
-
-V Poglavju~\ref{ch:uvod} bomo na hitro spoznali besedilne konstrukte kot so izreki, enačbe in dokazi. Naučili se bomo, kako se na njih sklicujemo. V Poglavju~\ref{ch:sklicevanje} se bomo srečali s sklicevanjem na besedilne konstrukte. Poglavje~\ref{ch:plovke} bo predstavilo vključevanje plovk: slik in tabel. V Poglavju~\ref{ch3} se bomo srečali s sklicevanjem na literaturo.
-Sledil bo samo še zaključek.
-
-Bodite pozorni, da se v glavni mapi nahajata še datoteki \verb+ declaration.tex+ in \verb+ izjava.tex+. Ti datoteki se ločeno prevedeta, ju podpišete in oddate v referat ločeno od magistrske naloge.
-
-%----------------------------------------------------------------
-% Poglavje (Chapter) 2
-%----------------------------------------------------------------
-\chapter{Sklicevanje na besedilne konstrukte}
-\label{ch:sklicevanje}
-
-Matematična ali popolna indukcija je eno prvih orodij, ki jih spoznamo za dokazovanje trditev pri matematičnih predmetih.
-\begin{izrek}
-\label{iz:1}
-Za vsako naravno število $n$ velja
-\begin{equation}
-n < 2^n.
-\label{eq:1}
-\end{equation}
-\end{izrek}
-\begin{dokaz}
-Dokazovanje z indukcijo zahteva, da neenakost~\eqref{eq:1} najprej preverimo za najmanjše naravno število --- $0$. Res, ker je $0 < 1 = 2^0$, je neenačba~\eqref{eq:1} za $n=0$ izpolnjena.
-
-Sledi indukcijski korak. S predpostavko, da je neenakost~\eqref{eq:1} veljavna pri nekem naravnem številu $n$, je potrebno pokazati, da je ista neenakost v veljavi tudi pri njegovem nasledniku --- naravnem številu $n+1$. Izračun zapišemo s tremi vrsticami, ki jih končamo s piko, saj do del tega stavka:
-\begin{align}
-n+1 &< 2^n + 1,  \label{eq:2}\\
-    &\le 2^n + 2^n, \label{eq:3}\\
-    &= 2^{n+1}. \nonumber
-\end{align}
-Neenakost~\eqref{eq:2} je posledica indukcijske predpostavke, neenakost~\eqref{eq:3} pa enostavno dejstvo, da je za vsako naravno število $n$ izraz $2^n$ vsaj tako velik kot 1. S tem je dokaz Izreka~\ref{iz:1} zaključen.
-\end{dokaz}
-
-Opazimo, da je \LaTeX\ številko izreka podredil številki poglavja.
-
-
-
-%----------------------------------------------------------------
-% Poglavje (Chapter) 3
-%----------------------------------------------------------------
-\chapter{Plovke: slike in tabele}
-\label{ch:plovke}
-
-Slike in daljše tabele praviloma vključujemo v dokument kot plovke. Pozicija plovke v končnem izdelku ni pogojena s tekom besedila, temveč z izgledom strani. \LaTeX\ bo skušal plovko postaviti samostojno, praviloma na vrh strani, na kateri se na takšno plovko prvič sklicujemo. Pri tem pa bo na vsako stran končnega izdelka želel postaviti tudi sorazmerno velik del besedila. V skrajnem primeru, če imamo res preveč plovk, se bo odločil za stran popolnoma zapolnjeno s plovkami.
-
-\section{Formati slik}
-Bitne slike, vektorske slike, kakršnekoli slike, z \LaTeX{}om lahko vključimo vse.
-Slika~\ref{pic1} je v {\tt .pdf} formatu.
-\begin{figure}
-    \begin{center}
-        \includegraphics[width=10cm]{pic1.pdf}
-    \end{center}
-\caption{Herschelov graf, vektorska grafika.}
-\label{pic1}
-\end{figure}
-Pa res lahko vključimo slike katerihkoli formatov? Žal ne. Programski paket \LaTeX\ lahko uporabljamo v več dialektih. Ukaz {\tt latex} ne mara vključenih slik v formatu Portable Document Format {\tt .pdf}, ukaz {\tt pdflatex} pa ne prebavi slik v Encapsulated Postscript Formatu {\tt .eps}.
-Strnjeno v Tabeli~\ref{tbl:1}.
-
-\begin{table}
-\caption{}
-    \begin{center}
-        \begin{tabular}{l|ccc}
-            ukaz/format & {\tt .pdf} & {\tt .eps} & ostali formati \\ \hline
-                        {\tt pdflatex} & da & ne & da \\
-                        {\tt latex}   & ne & da  & da
-        \end{tabular}
-    \end{center}
-\label{tbl:1}
-\end{table}
-
-Nasvet? Odločite se za uporabo ukaza {\tt pdflatex}. Vaš izdelek bo brez vmesnih stopenj na voljo v {.pdf} formatu in ga lahko odnesete v vsako tiskarno. Če morate na vsak način vključiti sliko, ki jo imate v {\tt .eps} formatu, jo vnaprej pretvorite v alternativni format, denimo {\tt .pdf}.
-
-Včasih se da v okolju za uporabo programskega paketa \LaTeX\ nastaviti na kakšen način bomo prebavljali vhodne dokumente. Spustni meni na Sliki~\ref{pic2} odkriva uporabo \LaTeX{}a v njegovi pdf inkarnaciji --- {\tt pdflatex}.
-\begin{figure}
-\begin{center}
-\includegraphics[width=10cm]{pic2.png}
-\end{center}
-\caption{Kateri dialekt uporabljati?}
-\label{pic2}
-\end{figure}
-Vključena Slika~\ref{pic2} je seveda bitna.
-
-
-
-%----------------------------------------------------------------
-% Poglavje (Chapter) 4
-%----------------------------------------------------------------
-\chapter{Razno}
-\label{ch:razno}
-
-\section{Notacije}
-\label{sec:notacije}
-
-Za notacijo spremenljivk ter skalarjev uporabimo običajno notacijo, t.j., spremenljivka $x$ in skalar $a$. Pri notaciji matrik ter vektorjev pa se poslužujemo krepega fonta. Torej, matrika $\boldsymbol{A}$ ter vektor $\boldsymbol{v}$,
-\begin{equation}
-\boldsymbol{A} = \begin{bmatrix}
-       a_{11} & a_{12} & \dots & a_{1q}  \\
-       a_{21} & a_{22} & \dots & a_{2q}  \\
-       \vdots  \\
-       a_{p1} & a_{p2} & \dots & a_{pq}  \\
-     \end{bmatrix}, \quad
-     \boldsymbol{v} = \begin{bmatrix}
-       x_1  \\
-       x_2  \\
-       \vdots  \\
-       x_q  \\
-     \end{bmatrix}. \nonumber
-\end{equation}
-
-%----------------------------------------------------------------
-\section{Lepe tabele in psevdokoda}
-\label{sec:psevdokoda}
-
-Psevdokoda~\ref{alg:primer} prikazuje primer delovanja genetskega algoritma, medtem ko Tabela~\ref{tab:params} prikazuje primer lepe tabele brez vertikalnih črt.
-
-\begin{algorithm}
-\caption{Psevdokoda genetskega algoritma}
-\label{alg:primer}
-\begin{algorithmic}[1]
-\footnotesize
-\STATE $t \gets 0$
-\STATE $InitPopulation[P(t)] \gets$ inicializiraj populacijo
-\STATE $EvalPopulation[P(t)] \gets$ evaluiraj populacijo
-\REPEAT
-\STATE $P'(t) \gets Variation[P(t)] \gets $ generiraj novo populacijo
-\STATE $EvalPopulation[P'(t)] \gets$ evaluiraj novo populacijo
-\STATE $P(t+1) \gets ApplyGeneticOperators[P'(t) \in Q]$
-\STATE $t \gets t+1$
-\UNTIL{prekinitev}
-\IF{rezultat dovolj dober}
-\STATE shrani rezultat
-\ENDIF
-\end{algorithmic}
-\end{algorithm}
-
-%---------------------------------------------------------------
-\begin{table}
-\caption{Primer enostavne tabele.}
-\centering
-\scalebox{0.82}{
-\begin{tabular}{c c c}
- \toprule
- Ime & Vrednost & Opis \\
- \midrule
- \textit{ $a$ } & 0.03 &  skalar \\
- \textit{ $x$ } & -1 & spremenljivka \\
- \bottomrule
-\end{tabular}
-}
-\label{tab:params}
-\end{table}
-
-%----------------------------------------------------------------
-% Poglavje (Chapter) 5
-%----------------------------------------------------------------
-\chapter{Kaj pa literatura?}
-\label{ch3}
-% Kot smo omenili že v uvodu, je pravi način za citiranje literature uporaba % \BibTeX{}a~\cite{ubi}.
-% Programski paket \LaTeX je prvotno predstavljen v priročniku~\cite{Lamport} % in je v resnici nadgradnja sistema \TeX\ avtorja Donalda Knutha, znanega po % denimo, če izpustim njegovo umetnost programiranja, Knuth-Bendixovem % algoritmu~\cite{Knuth}.
-% 
-% Vsem raziskovalcem s področja računalništva pa svetujem v branje mnenje L.\ % Fortnowa~\cite{Fortnow}.
-
-%----------------------------------------------------------------
-% Poglavje (Chapter) 6
-%----------------------------------------------------------------
-\chapter{Sklepne ugotovitve}
-Izbira \LaTeX\ ali ne \LaTeX\ je seveda prepuščena vam samim. Res je, da so prvi koraki v \LaTeX{}u težavni. Ta dokument naj vam služi kot začetna opora pri hoji.
-
-\fi
-
-
-
 
 
 %----------------------------------------------------------------
@@ -313,9 +133,10 @@ Novost naloge je v integraciji obdelave oblakov točk predora z analitičnim mod
 \end{itemize}
 
 
-
 \section{Struktura magistrske naloge}
-\label{sec:struktura}%TODO
+\label{sec:struktura}
+
+Magistrska naloga je organizirana v sedem poglavij. Po uvodu v Poglavju~\ref{ch:uvod} sledi pregled sorodnih del v Poglavju~\ref{ch:pregled-sorodnih-del}. Teoretične osnove so predstavljene v Poglavju~\ref{ch:teoreticne-osnove}, metodologija v Poglavju~\ref{ch:metodologija}. Implementacija je opisana v Poglavju~\ref{ch:implementacija}, eksperimentalno ovrednotenje v Poglavju~\ref{ch:eksperimentalno-ovrednotenje}. Sklepne ugotovitve so podane v Poglavju~\ref{ch:sklepne-ugotovitve}.
 
 
 %----------------------------------------------------------------
@@ -633,14 +454,77 @@ Sistem razlikuje med dvema kategorijama kršitev: situacijami, kjer se del vagon
 
 Ta pristop omogoča zgodnje opozarjanje pred potencialnimi trki in je posebej koristen pri dolgih kompozicijah, kjer se lahko kršitve razvijajo postopoma preko več pozicij. Celoten sistem je zasnovan za kontinuirano delovanje med simulacijo gibanja, kar omogoča analizo varnosti v realnem času.
 
+
 %----------------------------------------------------------------
 % Poglavje (Chapter) 5
 %----------------------------------------------------------------
 \chapter{Implementacija}
 \label{ch:implementacija}
 
+V tem poglavju predstavljamo tehnično realizacijo sistema za zaznavanje trkov med vlakom in predorom. Implementacija sledi metodološkemu pristopu iz poglavja~\ref{ch:metodologija} in je zasnovana kot modularen sistem s šestimi ključnimi komponentami.
+
 \section{Arhitektura sistema}
 \label{sec:arhitektura}
+
+Sistem je implementiran v programskem jeziku Python z uporabo knjižnic NumPy, SciPy, pandas in PyVista za vizualizacijo. Arhitektura sledi modularnemu pristopu, kjer vsak modul opravlja specifično nalogo v procesu zaznavanja trkov.
+
+Glavni tok izvajanja se začne z branjem Excel datotek, ki vsebujejo podatke o prerezih predora. Ti se transformirajo v 3D oblak točk z uporabo kontrolnih točk, ki definirajo pot železniške proge. Geometrija predora se organizira v horizontalne plasti, kjer se za vsako plast generirajo B-zlepki sten. Paralelno se simulira gibanje vagona vzdolž kontrolnih točk, pri čemer se kontinuirano preverjajo razdalje med kritičnimi točkami vagona in stenami predora.
+
+
+\section{Konfiguracija sistema}
+\label{sec:konfiguracija-sistema}
+
+Sistem omogoča prilagajanje parametrov preko konfiguracijskih slovarjev, kar zagotavlja fleksibilnost pri testiranju različnih scenarijev in prilagajanju različnim tipom predorov ter vlakov. Konfiguracija je organizirana v štiri glavne kategorije parametrov.
+
+\subsection{Parametri predorov}
+\label{subsec:parametri-predorov}
+
+Geometrijski model predora se konfigurira z naslednjimi parametri:
+
+\begin{itemize}
+\item \texttt{control\_points\_offset}: vertikalni odmik središča tirnic
+\item \texttt{tunnel\_center\_offset}: vertikalni odmik središča predora
+\item \texttt{train\_max\_height}: maksimalna višina vlaka
+\end{itemize}
+
+\subsection{Parametri vagona}
+\label{subsec:parametri-vagona}
+
+Geometrijski model vagona se konfigurira z naslednjimi parametri:
+
+\begin{itemize}
+\item \texttt{train\_width}: širina vagona (privzeto 3200 mm)
+\item \texttt{train\_height}: višina vagona (privzeto 3900 mm)  
+\item \texttt{train\_depth}: globina vagona (privzeto 6000 mm)
+\item \texttt{wheel\_offset}: odmik osi koles (privzeto 0.25, kar pomeni 25\% globine vagona)
+\end{itemize}
+
+\subsection{Parametri simulacije}
+\label{subsec:parametri-simulacije}
+
+Simulacija se nadzoruje z naslednjimi parametri:
+
+\begin{itemize}
+\item \texttt{n\_horizontal\_slices}: število horizontalnih plasti za analizo geometrije (privzeto 30)
+\item \texttt{wall\_spline\_degree}: stopnja B-zlepkov za stene predora (privzeto 3)
+\item \texttt{safety\_margin}: varnostna razdalja v milimetrih (privzeto 300 mm)
+\item \texttt{stop\_on\_safety\_violation}: prekinitev simulacije ob kršitvi (privzeto \texttt{true})
+\item \texttt{export\_mp4}: izvoz animacije v MP4 format (privzeto \texttt{false})
+\end{itemize}
+
+\subsection{Parametri vizualizacije}
+\label{subsec:parametri-vizualizacije}
+
+Sistem omogoča prilagoditev vizualizacije preko PyVista knjižnice:
+
+\begin{itemize}
+\item Barve objektov (vagon: modra, kršitve: oranžna/rumena)
+\item Velikosti točk in črt za prikaz oblaka točk ter B-zlepkov
+\item Nastavitve kamere in osvetlitve za optimalno vizualizacijo
+\end{itemize}
+
+Ta modularna konfiguracija omogoča hitro prilagajanje sistema različnim testnim scenarijem brez potrebe po spreminjanju osnovne kode. Preverjanje skladnosti parametrov (npr. \texttt{assert train\_height <= train\_max\_height}) zagotavlja, da konfiguracija ne vodi v neveljavne simulacije.
+
 
 \section{Ključni programski moduli}
 \label{sec:kljucni-moduli}
@@ -648,26 +532,89 @@ Ta pristop omogoča zgodnje opozarjanje pred potencialnimi trki in je posebej ko
 \subsection{ExcelParser -- predobdelava podatkov}
 \label{subsec:excel-parser}
 
+Modul \texttt{excel\_parser.py} implementira funkcionalnosti za branje in transformacijo vhodnih podatkov. Glavni funkciji \texttt{parse\_excel\_to\_points\_dict()} in \texttt{efficient\_data\_loading()} omogočata pretvorbo Excel datotek v strukturirane podatke za nadaljnjo obdelavo.
+
+Funkcija \texttt{parse\_excel\_to\_points\_dict()} bere Excel datoteko in organizira podatke v slovar, kjer ključi predstavljajo razdalje vzdolž poti, vrednosti pa koordinate X, Y, Z za vsak presek. 2D koordinate se dopolnijo z Z koordinato, izračunano iz pozicije vzdolž poti, pomnožene s faktorjem \texttt{space\_out\_factor} za normalizacijo razdalj.
+
+Za optimizacijo hitrosti nalaganja se implementira \texttt{efficient\_data\_loading()}, ki uporablja Parquet format za shranjevanje obdelanih podatkov. Ob prvem branju se Excel datoteka prevede in shrani v Parquet format, pri nadaljnjih uporabah pa se podatki naložijo neposredno iz Parquet datoteke, kar znatno skrajša čas nalaganja.
+
+Dodatno se implementira funkcionalnost \texttt{prepare\_control\_points()}, ki zagotavlja generiranje ali branje kontrolnih točk iz datoteke. Če kontrolne točke obstajajo v predpomnilni datoteki, se naložijo iz \texttt{control\_points.txt}, sicer se generirajo iz podatkov predora.
+
 \subsection{TunnelSlicer -- obdelava geometrije}
 \label{subsec:tunnel-slicer}
 
-\subsection{Wagon -- modeliranje vozila}
+Razred \texttt{TunnelSlicer} implementira kompleksno obdelavo geometrije predora. Njegova glavna naloga je transformacija 2D prerezov predora v 3D oblak točk ter generiranje horizontalnih plasti z B-zlepki sten.
+
+Ključna metoda \texttt{\_curve\_points()} implementira transformacijo koordinatnega sistema z uporabo Rodriguesove rotacijske formule iz enačbe~\eqref{eq:coordinate-transform}. Za vsak presek se določi lokalni koordinatni sistem na osnovi tangentnega vektorja kontrolnih točk ter izvede rotacijska transformacija, ki poravna presek z ukrivljeno potjo predora.
+
+Metoda \texttt{\_generate\_splines\_at\_y\_values()} organizira oblak točk v horizontalne prereze na različnih višinskih nivojih. Za vsak nivo se točke klasificirajo na levo in desno steno z uporabo funkcije \texttt{\_classify\_based\_on\_b\_spline()}, ki implementira teorijo določanja strani iz enačbe~\eqref{eq:side-determination}. Iz klasificiranih točk se nato generirajo B-zlepki z uporabo SciPy funkcij \texttt{splprep()} in \texttt{splev()}.
+
+Za učinkovitost se implementira predpomnjenje transformiranih podatkov v Parquet format. Metodi \texttt{save\_to\_parquet()} in \texttt{load\_from\_parquet()} omogočata shranjevanje in branje obdelanega oblaka točk, kar prepreči ponovne izračune pri večkratnih zaganjanjih sistema.
+
+\subsection{Wagon -- modeliranje vagona}
 \label{subsec:wagon-model}
+
+Razred \texttt{Wagon} implementira geometrijski model vagona in njegovo pozicioniranje vzdolž ukrivljene poti. Vagon je modeliran kot pravokotno telo z osmimi vogali, definiranim z dimenzijami širina, višina in globina.
+
+Metoda \texttt{\_calculate\_orthogonal\_coordinate\_system()} implementira pozicioniranje vagona z uporabo koncepta medosne razdalje~\eqref{eq:circle-curve-intersection}. Za določitev sprednje osi se uporabi metoda \texttt{\_find\_point\_at\_distance()}, ki rešuje presečišče kroga in krivulje z numeričnim iskanjem ničel funkcije s pomočjo enačbe~\eqref{eq:intersection-function}.
+
+Izvedba uporablja SciPy funkciji \texttt{root\_scalar()} z metodo \texttt{bracket} za zanesljivo iskanje presečišča ter \texttt{minimize\_scalar()} v primerih, ko presečišče ni najdeno. Ta pristop zagotavlja, da je medosna razdalja natančno ohranjena tudi na ostrih ovinkih.
+
+Metoda \texttt{get\_vertices\_at\_position()} izračuna vseh osem vogalov vagona z uporabo ortogonalnega koordinatnega sistema~\eqref{eq:wagon-frame}. Vogali se določijo na osnovi dejanskih mej vagona, ki upoštevajo parameter \texttt{wheel\_offset} za pozicioniranje osi koles.
 
 \subsection{CollisionDetector -- zaznavanje trkov}
 \label{subsec:collision-detector}
 
+Razred \texttt{CollisionDetector} implementira sistem za zaznavanje kršitev varnostnih razdalj med vagnom in stenami predora. Uporablja strategijo kritičnih točk~\eqref{eq:critical-points-wagon}.
+
+Metoda \texttt{get\_wagon\_points()} generira šest kritičnih točk vagona na določeni višini: tri vzdolžne pozicije (zadaj, sredina, spredaj) na obeh stranskih robovih. Te točke predstavljajo najverjetnejše lokacije za nastanek kolizij.
+
+Glavna metoda \texttt{check\_collision()} izvaja sistematično preverjanje vseh kritičnih točk za vse horizontalne plasti predora. Za vsako kritično točko se določi najbližja pozicija na ustrezni steni z metodo \texttt{find\_closest\_point\_on\_curve()}, ki implementira iskanje najbližje točke na B-zlepku ter določanje strani z vektorskim produktom.
+
+Sistem razlikuje med dvema tipoma kršitev: situacijami, kjer se del vagona nahaja zunaj fizičnih mej predora (\texttt{outside\_tunnel}), in kršitvami varnostne razdalje (\texttt{too\_close}), kjer je razdalja do stene manjša od predpisane varnostne meje.
+
+\subsection{Simulation -- koordinacija sistema}
+\label{subsec:simulation-coordinator}
+
+Razred \texttt{Simulation} služi kot glavna povezovalna komponenta, ki koordinira delovanje vseh višjih modulov. Implementira glavni simulacijski cikel, upravljanje kamere ter izvoz rezultatov.
+
+\subsection{Main -- glavna vstopna točka sistema}
+\label{subsec:main-script}
+
+Skripta \texttt{main.py} služi kot glavna vstopna točka sistema in koordinira delovanje vseh modulov. Omogoča izbiro med različnimi predori, nastavljanje parametrov ter zagon simulacije z vizualizacijo.
+
+
 \section{Numerične metode in optimizacija}
 \label{sec:numericne-metode}
 
-\subsection{Implementacija B-zlepkov s SciPy}
+\subsection{Izvedba B-zlepkov s SciPy}
 \label{subsec:implementacija-b-zlepkov}
 
-\subsection{Root finding za presečišča}
+B-zlepki so implementirani z uporabo SciPy knjižnice, specifično funkcij \texttt{splprep()} in \texttt{splev()}. Funkcija \texttt{splprep()} sprejme niz kontrolnih točk in generira parametričen B-zlepek s stopnjo gladkosti \texttt{s=0} za interpolacijo skozi vse točke. Parameter \texttt{k} določa stopnjo zlepka, privzeto nastavljeno na 3 za kubične zlepke.
+
+Za reprezentacijo sten predora se B-zlepki uporabljajo v 2D prostoru (koordinati X in Z), saj se obdelava izvaja po horizontalnih plasteh. Koordinata Y ostane konstantna za vsako plast. Ta pristop omogoča učinkovito obdelavo kompleksne 3D geometrije kot zaporedja 2D problemov.
+
+\subsection{Numerično iskanje ničel za presečišča}
 \label{subsec:root-finding}
+
+Za določitev položaja vagona vzdolž ukrivljene poti se implementira numerično iskanje ničel z uporabo SciPy funkcije \texttt{root\_scalar()}. Problem presečišča kroga in krivulje iz enačbe~\eqref{eq:intersection-function} se reši z metodo \texttt{bracket}, ki zahteva interval z različnim predznakom funkcije na koncih.
+
+Izvedba najprej vzorči funkcijo na 1000 točkah ter išče spremembe predznaka, ki nakazujejo prisotnost ničle. Za vsak tak interval se nato izvede natančno iskanje ničle z metodo \texttt{bracket}. V primerih, ko presečišče ni najdeno, se uporabi metoda \texttt{minimize\_scalar()}, ki poišče najbližjo točko na krivulji ter aproksimira smer s tangentnim vektorjem.
 
 \section{Vizualizacija s PyVista}
 \label{sec:vizualizacija-pyvista}
+
+Sistem uporablja PyVista knjižnico za 3D vizualizacijo in animacijo simulacije. Izvedba omogoča prikaz oblaka točk predora, B-zlepkov sten, gibanja vagona ter zaznavanja kršitev v realnem času.
+
+Glavna vizualizacija se izvaja preko objekta \texttt{pv.Plotter()}, ki omogoča interaktivno 3D sceno. Oblak točk predora se prikaže z metodo \texttt{add\_points()}, B-zlepki sten pa z \texttt{add\_mesh()} za polilinijske objekte. Vagon se predstavi kot pravokotno telo z \texttt{pv.Cube()}.
+
+Za zaznavanje kršitev se implementira vizualna povratna informacija z barvnimi črtami med kritičnimi točkami vagona in najbližjimi stenami. Oranžne črte označujejo situacije zunaj predora, rumene pa kršitve varnostne razdalje. Dodatno se dodajo besedilne oznake z informacijami o razdalji in tipu kršitve.
+
+Sistem omogoča izvoz animacije v MP4 format z nastavljanjem parametra \texttt{export\_mp4=True}, kar je koristno za dokumentacijo rezultatov in predstavitve.
+
+
+
+
 
 %----------------------------------------------------------------
 % Poglavje (Chapter) 6
