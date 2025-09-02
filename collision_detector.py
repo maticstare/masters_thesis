@@ -66,7 +66,7 @@ class CollisionDetector:
         
         return side_value, point_3d, closest_3d
 
-    def get_wagon_points(self, wagon_vertices: np.ndarray, y_value: float) -> Dict[str, Dict[str, np.ndarray]]:
+    def get_bounding_box_points(self, wagon_vertices: np.ndarray, y_value: float) -> Dict[str, Dict[str, np.ndarray]]:
         """
         Get wagon points for collision checking at specified Y-level.
         
@@ -154,8 +154,7 @@ class CollisionDetector:
         }
 
         for y_value, (left_wall, right_wall) in self.tunnel_slicer.wall_points.items():
-            wagon_points = self.get_wagon_points(wagon_vertices, y_value)
-            
+            wagon_points = self.get_bounding_box_points(wagon_vertices, y_value)
             # Check all wagon points
             for side in ['left', 'right']:
                 wall_points = left_wall if side == 'left' else right_wall

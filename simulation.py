@@ -22,7 +22,7 @@ class Simulation:
         Args:
             plotter: PyVista plotter for visualization
             control_points: Array of points defining the track path
-            wagon: Wagon object for simulation
+            bounding_box: Wagon object for simulation
             tunnel_slicer: TunnelSlicer object for tunnel geometry
             control_points_offset: Offset to align control points with track in millimeters
             export_mp4: Whether to export video as MP4 file
@@ -44,9 +44,14 @@ class Simulation:
     def _setup_simulation(self) -> None:
         """Initialize the simulation environment and visualization."""
         self.control_points[:, 0] += self.control_points_offset
-        
-        self.plotter.add_mesh(self.wagon.wagon_mesh, color=self.wagon.color, show_edges=True, label="Wagon")
-        
+
+        bounding_box_opacity = 1
+        if self.wagon.train_model:
+            self.plotter.add_mesh(self.wagon.train_model, color="gray", show_edges=True)
+            bounding_box_opacity = 0.3
+
+        self.plotter.add_mesh(self.wagon.bounding_box, color=self.wagon.color, show_edges=True, opacity=bounding_box_opacity)
+
         self.plotter.add_points(self.control_points, color="red", point_size=5, label="Control Points")
         
         self.plotter.show(interactive_update=True)
@@ -64,17 +69,17 @@ class Simulation:
             distance_back: Distance multiplier behind wagon (relative to wagon depth)
             height_above: Height multiplier above wagon (relative to wagon height)
         """
-        wagon_center = self.wagon.center
+        bounding_box_center = self.wagon.center
+        wheelbase = self.wagon.depth * (1 - 2 * self.wagon.wheel_offset)
         _, _, forward, up, _ = self.wagon._calculate_orthogonal_coordinate_system(
-            self.control_points, i, self.wagon.depth
+            self.control_points, i, wheelbase
         )
-        
-        camera_position = (wagon_center - 
-                          forward * (self.wagon.depth * distance_back) + 
+        camera_position = (bounding_box_center -
+                          forward * (self.wagon.depth * distance_back) +
                           up * (self.wagon.height * height_above))
         
         self.plotter.camera.position = camera_position
-        self.plotter.camera.focal_point = wagon_center
+        self.plotter.camera.focal_point = bounding_box_center
         self.plotter.camera.up = up
     
     def run(self) -> None:
@@ -87,12 +92,12 @@ class Simulation:
         """
         for i in range(len(self.control_points) - 1):
             terminate_simulation = self.wagon.update_position(self.control_points, i)
-            
+
             self._update_camera(i, distance_back=2.0, height_above=0.8)
-            
-            # Perform collision detection for wagon
+
+            # Perform collision detection for bounding box
             collision_result = self.collision_detector.check_collision(
-                self.wagon.wagon_mesh.points, i, self.safety_margin
+                self.wagon.bounding_box.points, i, self.safety_margin
             )
             
             safety_violation = False
@@ -105,6 +110,9 @@ class Simulation:
             # Stop simulation if safety violation occurs
             if safety_violation and self.stop_on_safety_violation:
                 print("Simulation stopped due to safety violation.")
+                #add p0 and p1
+                self.plotter.add_points(self.wagon.p0.reshape(1, -1), color="orange", point_size=10)
+                self.plotter.add_points(self.wagon.p1.reshape(1, -1), color="orange", point_size=10)
                 break
             
             # Stop simulation if wagon reaches the end of control points

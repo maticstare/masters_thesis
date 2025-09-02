@@ -48,9 +48,28 @@ control_points = prepare_control_points(points_dict, space_out_factor, curve_fun
 
 plotter = pv.Plotter()
 
-train_height = 3900
-train_width = 3200
-train_depth = 6000
+load_model = True
+
+train_model = None
+if load_model:
+    train_model = pv.read("data/train_model.stl")
+    train_model.rotate_y(90, inplace=True)
+    train_model.scale(950, inplace=True)
+    
+    # Extract dimensions from the mesh bounding box
+    bounds = train_model.bounds
+    train_width = int(bounds[1] - bounds[0])
+    train_height = int(bounds[3] - bounds[2])
+    train_depth = int(bounds[5] - bounds[4])
+    
+    print(f"Using mesh dimensions: Width={train_width}, Height={train_height}, Depth={train_depth}")
+    
+else:
+    train_height = 3900
+    train_width = 3200
+    train_depth = 6000
+
+
 n_horizontal_slices = 30
 wall_spline_degree = 3
 safety_margin = 300
@@ -63,7 +82,7 @@ tunnel_slicer = TunnelSlicer(points_dict, control_points.copy(), plotter, n_hori
 tunnel_slicer.visualize_the_tunnel(wall_spline_degree=wall_spline_degree)
 
 
-wagon = Wagon(width=train_width, height=train_height, depth=train_depth, wheel_offset=0.25, color="blue")
+wagon = Wagon(width=train_width, height=train_height, depth=train_depth, wheel_offset=0.20, color="blue", train_model=train_model)
 
 simulation = Simulation(
     plotter=plotter,

@@ -12,7 +12,7 @@ class Wagon:
     along a curved path defined by control points.
     """
 
-    def __init__(self, width: int, height: int, depth: int, center: Tuple[float, float, float] = (0, 0, 0), wheel_offset: float = 0.25, color: str = "blue"):
+    def __init__(self, width: int, height: int, depth: int, center: Tuple[float, float, float] = (0, 0, 0), wheel_offset: float = 0.25, color: str = "blue", train_model: Optional[pv.PolyData] = None):
         """
         Initialize a train wagon.
         
@@ -22,18 +22,28 @@ class Wagon:
             depth: Wagon depth (length) in millimeters
             center: Initial center position (x, y, z)
             color: Color for visualization
-            wheel_offset: Offset for wheel position from front or back [0, 0.49]
+            wheel_offset: Offset for wheel position from front or back [0, 0.5)
         """
         self.width = width
         self.height = height
         self.depth = depth  
         self.center = center
         self.color = color
-        self.wheel_offset = np.clip(wheel_offset, 0, 0.49)
-        self.wagon_mesh = self.create_mesh()
+        self.wheel_offset = np.clip(wheel_offset, 0, np.nextafter(0.5, 0))
+        self.bounding_box = self.create_bounding_box()
         self.control_points_2d_tck: Optional[tuple] = None
+        self.p0 = None
+        self.p1 = None
+
+        if train_model:
+            self.train_model = train_model.copy()
+            self.train_model.points = self.train_model.points - self.train_model.center
+            self.original_train_points = self.train_model.points.copy()
+        else:
+            self.train_model = None
+            self.original_train_points = None
     
-    def create_mesh(self) -> pv.PolyData:
+    def create_bounding_box(self) -> pv.PolyData:
         """
         Create PyVista mesh representation of the wagon.
         
@@ -46,24 +56,7 @@ class Wagon:
             y_length=self.height, 
             z_length=self.depth
         )
-    
-    def get_vertices_at_position(self, control_points: np.ndarray, position_index: int) -> np.ndarray:
-        """
-        Calculate wagon vertices at a specific control point position.
         
-        Args:
-            control_points: Array of control points defining the path
-            position_index: Index of the control point to position wagon at
-        
-        Returns:
-            Array of 8 vertices defining the wagon box corners
-        """
-        wheelbase = self.depth * (1 - 2 * self.wheel_offset)
-        p0, p1, _, up, right = self._calculate_orthogonal_coordinate_system(
-            control_points, position_index, wheelbase
-        )
-        return self._create_vertices(p0, p1, up, right)
-    
     def _create_vertices(self, p0: np.ndarray, p1: np.ndarray, up: np.ndarray, right: np.ndarray) -> np.ndarray:
         """
         Create the 8 vertices of the wagon box from position and orientation vectors.
@@ -109,17 +102,18 @@ class Wagon:
         Returns:
             Tuple of (p0, p1, forward, up, right) vectors
         """
-        p0 = control_points[i]
-        p1 = self._find_point_at_distance(control_points, p0, wheelbase)
-        
+        self.p0 = control_points[i]
+        self.p1 = self._find_point_at_distance(control_points, self.p0, wheelbase)
+
         # Calculate orthogonal coordinate system
-        forward = (p1 - p0) / np.linalg.norm(p1 - p0)
+        forward = (self.p1 - self.p0) / np.linalg.norm(self.p1 - self.p0)
         up = np.array([0, 1, 0])
         right = np.cross(up, forward) / np.linalg.norm(np.cross(up, forward))
-        
-        return p0, p1, forward, up, right
+
+        return self.p0, self.p1, forward, up, right
 
     def _find_point_at_distance(self, control_points: np.ndarray, start_point: np.ndarray, distance: float) -> np.ndarray:
+        #TODO: POTENTIAL PERFORMANCE FIX
         """
         Find point at given distance along spline using circle-curve intersection method.
         
@@ -195,12 +189,30 @@ class Wagon:
         if self.control_points_2d_tck is None:
             self.control_points_2d_tck, _ = splprep([control_points[:, 0], control_points[:, 2]], s=0)
 
-        # Update wagon position
-        self.wagon_mesh.points = self.get_vertices_at_position(control_points, control_point_index)
-        self.center = self.wagon_mesh.center
-        
+        # Update bounding box position
+        wheelbase = self.depth * (1 - 2 * self.wheel_offset)
+        p0, p1, forward, up, right = self._calculate_orthogonal_coordinate_system(
+            control_points, control_point_index, wheelbase
+        )
+
+        self.bounding_box.points = self._create_vertices(p0, p1, up, right)
+        self.center = self.bounding_box.center
+    
+        if self.train_model:
+            # Update train model position
+            self.train_model.points = self.original_train_points.copy()
+            
+            transform_matrix = np.eye(4)
+            transform_matrix[:3, 0] = right
+            transform_matrix[:3, 1] = up
+            transform_matrix[:3, 2] = forward
+            transform_matrix[:3, 3] = self.center
+            
+            # Apply transformation
+            self.train_model.transform(transform_matrix, inplace=True)
+
         # Check if wagon has passed near the end of the tunnel
         _, current_p1, _, _, _ = self._calculate_orthogonal_coordinate_system(
-            control_points, control_point_index, self.depth * (1 - 2 * self.wheel_offset)
+            control_points, control_point_index, wheelbase
         )
         return current_p1[2] >= control_points[-2][2]
