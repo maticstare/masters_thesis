@@ -11,18 +11,24 @@ class CollisionDetector:
     tunnel walls or outside the tunnel boundaries.
     """
     
-    def __init__(self, tunnel_slicer: TunnelSlicer, safety_margin: float = 200.0) -> None:
+    def __init__(self, tunnel_slicer: TunnelSlicer, safety_margin: float = 200.0, stop_on_safety_violation: bool = True) -> None:
         """
         Initialize the collision detection system.
         
         Args:
             tunnel_slicer: TunnelSlicer instance for tunnel geometry
             safety_margin: Additional safety distance from walls in millimeters
+            stop_on_safety_violation: Whether to stop simulation on collision detection
         """
         self.tunnel_slicer = tunnel_slicer
         self.safety_margin = safety_margin
+        self.stop_on_safety_violation = stop_on_safety_violation
         self.collision_history: List[Dict[str, Any]] = []
 
+        self.collision_margins = {
+            y_value: {"right_back": 0, "right_middle": 0, "right_front": 0, "left_front": 0, "left_middle": 0, "left_back": 0} for y_value in tunnel_slicer.wall_points.keys()
+        }
+        
     def find_closest_point_on_curve(self, point: np.ndarray, curve_points: np.ndarray, y_value: float) -> Tuple[float, np.ndarray, np.ndarray]:
         """
         Find closest point on curve and determine which side the point is on.
@@ -120,6 +126,9 @@ class CollisionDetector:
         is_outside = (side == 'left' and side_value >= 0) or (side == 'right' and side_value <= 0)
         too_close = distance < safety_margin
         
+        if is_outside and distance > self.collision_margins[y_value][f"{side}_{point_name}"]:
+            self.collision_margins[y_value][f"{side}_{point_name}"] = distance
+            
         if is_outside or too_close:
             return {
                 'wagon_point': point,
@@ -168,7 +177,9 @@ class CollisionDetector:
                         results['safety_violation_detected'] = True
                         results['violations'].append(violation)
                         results['closest_distance'] = min(results['closest_distance'], abs(violation['distance']))
-                        self.visualize_violation(self.tunnel_slicer.plotter, violation)
+                        
+                        if self.stop_on_safety_violation:
+                            self.visualize_violation(self.tunnel_slicer.plotter, violation)
 
         if results['safety_violation_detected']:
             self.collision_history.append(results)

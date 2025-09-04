@@ -1,5 +1,5 @@
 import pyvista as pv
-import numpy as np
+import json
 from tunnel_slicer import TunnelSlicer
 from data_preprocessing.excel_parser import efficient_data_loading, prepare_control_points
 from train_generator import Wagon
@@ -33,8 +33,8 @@ tunnel_configs = {
     }
 }
 
-tunnel = "globoko"
-#tunnel = "ringo"
+#tunnel = "globoko"
+tunnel = "ringo"
 
 selected_config = tunnel_configs[tunnel]
 folder_path = selected_config["folder_path"]
@@ -48,32 +48,50 @@ control_points = prepare_control_points(points_dict, space_out_factor, curve_fun
 
 plotter = pv.Plotter()
 
-load_model = True
+simulator_modes = ["normal", "calculating_collision_margins", "shaved_off_model", "train_model"]
+mode = 2
+select_execution_mode = simulator_modes[mode]  # change index to select mode
 
 train_model = None
-if load_model:
-    train_model = pv.read("data/train_model.stl")
-    train_model.rotate_y(90, inplace=True)
-    train_model.scale(950, inplace=True)
+match select_execution_mode:
+    case "normal":
+        train_height = 3900
+        train_width = 3200
+        train_depth = 6000
+        safety_margin = 300
+        
+    case "calculating_collision_margins":
+        train_height = 4900
+        train_width = 10200
+        train_depth = 6000
+        safety_margin = 0
     
-    # Extract dimensions from the mesh bounding box
-    bounds = train_model.bounds
-    train_width = int(bounds[1] - bounds[0])
-    train_height = int(bounds[3] - bounds[2])
-    train_depth = int(bounds[5] - bounds[4])
+    case "shaved_off_model":
+        train_model = pv.read(f"data/{tunnel}/shaved_off_wagon_model.vtk")
+        train_height = 4900
+        train_width = 10200
+        train_depth = 6000
+        safety_margin = 0
     
-    print(f"Using mesh dimensions: Width={train_width}, Height={train_height}, Depth={train_depth}")
-    
-else:
-    train_height = 3900
-    train_width = 3200
-    train_depth = 6000
+    case "train_model":
+        train_model = pv.read("data/train_model.stl")
+        train_model.rotate_y(90, inplace=True)
+        train_model.scale(950, inplace=True)
+        
+        bounds = train_model.bounds
+        train_width = int(bounds[1] - bounds[0])
+        train_height = int(bounds[3] - bounds[2])
+        train_depth = int(bounds[5] - bounds[4])
+        safety_margin = 300
+        print(f"Using mesh dimensions: Width={train_width}, Height={train_height}, Depth={train_depth}")
 
-
-n_horizontal_slices = 30
+    case _:
+        raise ValueError(f"Unknown execution mode: {select_execution_mode}") 
+        
+        
+n_horizontal_slices = 25
 wall_spline_degree = 3
-safety_margin = 300
-stop_on_safety_violation = True
+stop_on_safety_violation = False
 export_mp4 = False
 
 assert train_height <= selected_config["train_max_height"], f"Train height {train_height} exceeds maximum height {selected_config['train_max_height']} for tunnel {tunnel}."
@@ -95,6 +113,14 @@ simulation = Simulation(
     safety_margin=safety_margin
 )
 simulation.run()
+
+if select_execution_mode == "calculating_collision_margins":
+    collision_margins = simulation.collision_detector.collision_margins.copy()
+    collision_margins["train_width"] = train_width
+    collision_margins["train_depth"] = train_depth
+
+    with open(f"data/{tunnel}/collision_margins.json", "w") as f:
+        json.dump(collision_margins, f)
 
 plotter.enable()
 plotter.show()

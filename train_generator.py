@@ -215,4 +215,4 @@ class Wagon:
         _, current_p1, _, _, _ = self._calculate_orthogonal_coordinate_system(
             control_points, control_point_index, wheelbase
         )
-        return current_p1[2] >= control_points[-2][2]
+        return current_p1[2] >= control_points[-15][2]

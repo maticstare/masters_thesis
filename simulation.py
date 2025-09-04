@@ -38,7 +38,7 @@ class Simulation:
         self.stop_on_safety_violation = stop_on_safety_violation
         self.safety_margin = safety_margin
         
-        self.collision_detector = CollisionDetector(tunnel_slicer, safety_margin=safety_margin)
+        self.collision_detector = CollisionDetector(tunnel_slicer, safety_margin=safety_margin, stop_on_safety_violation=stop_on_safety_violation)
         self._setup_simulation()
     
     def _setup_simulation(self) -> None:
@@ -48,7 +48,7 @@ class Simulation:
         bounding_box_opacity = 1
         if self.wagon.train_model:
             self.plotter.add_mesh(self.wagon.train_model, color="gray", show_edges=True)
-            bounding_box_opacity = 0.3
+            bounding_box_opacity = 0.1
 
         self.plotter.add_mesh(self.wagon.bounding_box, color=self.wagon.color, show_edges=True, opacity=bounding_box_opacity)
 
@@ -102,9 +102,9 @@ class Simulation:
             
             safety_violation = False
             if collision_result['safety_violation_detected']:
-                print(f"Safety violation detected for Wagon at frame {i}!")
-                for violation in collision_result['violations']:
-                    print(f"  - Violation: {violation}")
+                #print(f"Safety violation detected for Wagon at frame {i}!")
+                #for violation in collision_result['violations']:
+                #    print(f"  - Violation: {violation}")
                 safety_violation = True
             
             # Stop simulation if safety violation occurs
