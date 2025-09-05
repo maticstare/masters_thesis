@@ -100,7 +100,7 @@ tunnel_slicer = TunnelSlicer(points_dict, control_points.copy(), plotter, n_hori
 tunnel_slicer.visualize_the_tunnel(wall_spline_degree=wall_spline_degree)
 
 
-wagon = Wagon(width=train_width, height=train_height, depth=train_depth, wheel_offset=0.20, color="blue", train_model=train_model)
+wagon = Wagon(width=train_width, height=train_height, depth=train_depth, wheel_offset=0.20, color="blue", train_model=train_model, simulator_mode=select_execution_mode)
 
 simulation = Simulation(
     plotter=plotter,

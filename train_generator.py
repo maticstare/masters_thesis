@@ -12,7 +12,7 @@ class Wagon:
     along a curved path defined by control points.
     """
 
-    def __init__(self, width: int, height: int, depth: int, center: Tuple[float, float, float] = (0, 0, 0), wheel_offset: float = 0.25, color: str = "blue", train_model: Optional[pv.PolyData] = None):
+    def __init__(self, width: int, height: int, depth: int, center: Tuple[float, float, float] = (0, 0, 0), wheel_offset: float = 0.25, color: str = "blue", train_model: Optional[pv.PolyData] = None, simulator_mode: str = "normal") -> None:
         """
         Initialize a train wagon.
         
@@ -23,6 +23,8 @@ class Wagon:
             center: Initial center position (x, y, z)
             color: Color for visualization
             wheel_offset: Offset for wheel position from front or back [0, 0.5)
+            train_model: Optional PyVista mesh for detailed wagon model
+            simulator_mode: Mode of the simulator affecting wagon behavior
         """
         self.width = width
         self.height = height
@@ -34,14 +36,16 @@ class Wagon:
         self.control_points_2d_tck: Optional[tuple] = None
         self.p0 = None
         self.p1 = None
+        
+        self.train_model = None
+        self.original_train_points = None
+        self.simulator_mode = simulator_mode
 
         if train_model:
             self.train_model = train_model.copy()
+            self.original_train_center = self.train_model.center
             self.train_model.points = self.train_model.points - self.train_model.center
             self.original_train_points = self.train_model.points.copy()
-        else:
-            self.train_model = None
-            self.original_train_points = None
     
     def create_bounding_box(self) -> pv.PolyData:
         """
@@ -210,7 +214,13 @@ class Wagon:
             
             # Apply transformation
             self.train_model.transform(transform_matrix, inplace=True)
-
+            
+            
+            if self.simulator_mode == "shaved_off_model":
+                #correct offset due to original model center
+                self.train_model.points[:, 1] += self.original_train_center[1] - self.height/2
+                self.train_model.points += right * self.original_train_center[0]
+            
         # Check if wagon has passed near the end of the tunnel
         _, current_p1, _, _, _ = self._calculate_orthogonal_coordinate_system(
             control_points, control_point_index, wheelbase
