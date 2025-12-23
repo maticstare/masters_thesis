@@ -49,8 +49,10 @@ control_points = prepare_control_points(points_dict, space_out_factor, curve_fun
 plotter = pv.Plotter()
 
 simulator_modes = ["normal", "calculating_collision_margins", "shaved_off_model", "train_model"]
-mode = 2
+mode = 0
 select_execution_mode = simulator_modes[mode]  # change index to select mode
+
+stop_on_safety_violation = False
 
 train_model = None
 match select_execution_mode:
@@ -59,6 +61,7 @@ match select_execution_mode:
         train_width = 3200
         train_depth = 6000
         safety_margin = 300
+        stop_on_safety_violation = False
         
     case "calculating_collision_margins":
         train_height = 4900
@@ -91,7 +94,6 @@ match select_execution_mode:
         
 n_horizontal_slices = 25
 wall_spline_degree = 3
-stop_on_safety_violation = False
 export_mp4 = False
 
 assert train_height <= selected_config["train_max_height"], f"Train height {train_height} exceeds maximum height {selected_config['train_max_height']} for tunnel {tunnel}."
