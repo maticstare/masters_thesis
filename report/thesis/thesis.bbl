@@ -1,0 +1,99 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{Schauer2014}
+J.~Schauer, A.~N{\"u}chter,
+  \href{https://doi.org/10.5194/isprsarchives-XL-3-289-2014}{Efficient point
+  cloud collision detection and analysis in a tunnel environment using
+  kinematic laser scanning and k-d tree search}, Int. Arch. Photogramm. Remote
+  Sens. Spatial Inf. Sci. XL-3 (2014) 289 -- 295.
+\newline\urlprefix\url{https://doi.org/10.5194/isprsarchives-XL-3-289-2014}
+
+\bibitem{hermann2014}
+A.~Hermann, F.~Drews, J.~Bauer, S.~Klemm, A.~Roennau, R.~Dillmann, Unified gpu
+  voxel collision detection for mobile manipulation planning, IEEE
+  International Conference on Intelligent Robots and Systems (09 2014).
+\newblock \href {https://doi.org/10.1109/IROS.2014.6943148}
+  {\path{doi:10.1109/IROS.2014.6943148}}.
+
+\bibitem{niwa2016}
+T.~Niwa, H.~Masuda,
+  \href{https://doi.org/10.1080/16864360.2015.1131546}{Interactive collision
+  detection for engineering plants based on large-scale point-clouds},
+  Computer-Aided Design and Applications 13~(4) (2016) 511--518.
+\newblock \href
+  {http://arxiv.org/abs/https://doi.org/10.1080/16864360.2015.1131546}
+  {\path{arXiv:https://doi.org/10.1080/16864360.2015.1131546}}, \href
+  {https://doi.org/10.1080/16864360.2015.1131546}
+  {\path{doi:10.1080/16864360.2015.1131546}}.
+\newline\urlprefix\url{https://doi.org/10.1080/16864360.2015.1131546}
+
+\bibitem{klein-2004-point}
+J.~Klein, G.~Zachmann, Point {Cloud} {Surfaces} using {Geometric} {Proximity}
+  {Graphs}, Computers and Graphics 28~(6) (2004).
+
+\bibitem{li2020}
+Y.~Li, L.~Ma, Z.~Zhong, F.~Liu, D.~Cao, J.~Li, M.~A. Chapman,
+  \href{https://arxiv.org/abs/2005.09830}{Deep learning for lidar point clouds
+  in autonomous driving: A review}, arXiv preprint arXiv:2005.09830 (2020).
+\newblock \href {http://arxiv.org/abs/2005.09830} {\path{arXiv:2005.09830}}.
+\newline\urlprefix\url{https://arxiv.org/abs/2005.09830}
+
+\bibitem{Everett_2021}
+M.~Everett, Y.~F. Chen, J.~P. How,
+  \href{http://dx.doi.org/10.1109/ACCESS.2021.3050338}{Collision avoidance in
+  pedestrian-rich environments with deep reinforcement learning}, IEEE Access 9
+  (2021) 10357--10377.
+\newblock \href {https://doi.org/10.1109/access.2021.3050338}
+  {\path{doi:10.1109/access.2021.3050338}}.
+\newline\urlprefix\url{http://dx.doi.org/10.1109/ACCESS.2021.3050338}
+
+\bibitem{infrastructures5050043}
+T.~F. Brustad, R.~Dalmo, \href{https://www.mdpi.com/2412-3811/5/5/43}{Railway
+  transition curves: A review of the state-of-the-art and future research},
+  Infrastructures 5~(5) (2020).
+\newblock \href {https://doi.org/10.3390/infrastructures5050043}
+  {\path{doi:10.3390/infrastructures5050043}}.
+\newline\urlprefix\url{https://www.mdpi.com/2412-3811/5/5/43}
+
+\bibitem{s24134403}
+L.~Jiang, Y.~Li, Y.~Zhao, M.~Cen,
+  \href{https://www.mdpi.com/1424-8220/24/13/4403}{The characteristics of
+  long-wave irregularities in high-speed railway vertical curves and method for
+  mitigation}, Sensors 24~(13) (2024).
+\newblock \href {https://doi.org/10.3390/s24134403}
+  {\path{doi:10.3390/s24134403}}.
+\newline\urlprefix\url{https://www.mdpi.com/1424-8220/24/13/4403}
+
+\bibitem{DAI2015144}
+J.~S. Dai,
+  \href{https://www.sciencedirect.com/science/article/pii/S0094114X15000415}{Euler-rodrigues
+  formula variations, quaternion conjugation and intrinsic connections},
+  Mechanism and Machine Theory 92 (2015) 144--152.
+\newblock \href
+  {https://doi.org/https://doi.org/10.1016/j.mechmachtheory.2015.03.004}
+  {\path{doi:https://doi.org/10.1016/j.mechmachtheory.2015.03.004}}.
+\newline\urlprefix\url{https://www.sciencedirect.com/science/article/pii/S0094114X15000415}
+
+\bibitem{b_splines}
+M.~S. Hasan, M.~N. Alam, M.~Fayz-Al-Asad, N.~Muhammad, C.~Tunç,
+  \href{https://doi.org/10.1515/nleng-2024-0054}{B-spline curve theory: An
+  overview and applications in real life}, Nonlinear Engineering 13~(1) (2024)
+  20240054 [cited 2025-08-16].
+\newblock \href {https://doi.org/doi:10.1515/nleng-2024-0054}
+  {\path{doi:doi:10.1515/nleng-2024-0054}}.
+\newline\urlprefix\url{https://doi.org/10.1515/nleng-2024-0054}
+
+\bibitem{packing_problem}
+V.~Chekanin, Solving the problem of packing objects of complex geometric shape
+  into a container of arbitrary dimension, Proceedings of the 30th
+  International Conference on Computer Graphics and Machine Vision (GraphiCon
+  2020). Part 2 (2020) paper50--1\href
+  {https://doi.org/10.51130/graphicon-2020-2-3-50}
+  {\path{doi:10.51130/graphicon-2020-2-3-50}}.
+
+\end{thebibliography}
