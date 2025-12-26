@@ -238,12 +238,38 @@ Za konstrukcijo rotacijske matrike $\boldsymbol{R}$ uporabimo Rodriguesovo rotac
 \boldsymbol{R} = \boldsymbol{I} + \sin(\theta) \boldsymbol{K} + (1 - \cos(\theta)) \boldsymbol{K}^2
 \end{equation}
 
-, kjer je $\theta$ kot med vektorjema, $\boldsymbol{K}$ pa antisimetrična matrika osi rotacije. Namen te transformacije je prilagoditi oblak točk dejanskemu poteku predora v prostoru. Ker so prvotni podatki organizirani kot ravni prerezi, rotacijska transformacija zagotovi, da se oblak točk čim bolje prilega dejanski ukrivljeni geometriji predora. To je ključno za natančno predstavitev prostorskih odnosov med vlakom in stenami predora ter posledično za zanesljivo zaznavanje trkov.
+, kjer je $\theta$ kot med vektorjema, $\boldsymbol{K}$ pa antisimetrična matrika osi rotacije. Namen te transformacije je prilagoditi oblak točk dejanskemu poteku predora v prostoru. Ker so prvotni podatki organizirani kot ravni prerezi, rotacijska transformacija zagotovi, da se oblak točk čim bolje prilega dejanski ukrivljeni geometriji predora. To je ključno za natančno predstavitev prostorskih odnosov med vlakom in stenami predora ter posledično za zanesljivo zaznavanje trkov. Na spodnjih slikah je razvidno, kako je predor postavljen pred transformacijo~\ref{fig:before_curving}, in kako po transformaciji~\ref{fig:after_curving}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=11cm]{before_curving.png}
+    \caption{
+        Postavitev predora v prostoru pred transformacijo z Rodriguesovo rotacijsko formulo.
+    }\label{fig:before_curving}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=11cm]{after_curving.png}
+    \caption{
+        Postavitev predora v prostoru po transformaciji z Rodriguesovo rotacijsko formulo.
+    }\label{fig:after_curving}
+\end{figure}
+
+
 
 \section{Geometrijski model vagona}
 \label{sec:geometrijski-model-vagona}
 
-Vagon je modeliran kot pravokotno telo (kvader) z dimenzijami širina $w$, višina $h$ in globina $d$. Geometrijska predstavitev temelji na konceptu medosne razdalje in ortogonalnem koordinatnem sistemu.
+Vagon je modeliran kot pravokotno telo (kvader) z dimenzijami širina $w$, višina $h$ in globina $d$. Geometrijska predstavitev temelji na konceptu medosne razdalje in ortogonalnem koordinatnem sistemu. Na spodnji sliki je razvidno, kako je vagon postavljen v prostoru.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=11cm]{wheelbase.png}
+    \caption{
+        Postavitev vagona v prostoru z označenima točkama $\boldsymbol{p}_0$ in $\boldsymbol{p}_1$, ki predstavljata njegove osi.
+    }\label{fig:wheelbase}
+\end{figure}
 
 \subsection{Pozicioniranje z medosno razdaljo}
 \label{subsec:pozicioniranje-medosje}
@@ -329,15 +355,30 @@ p &\in \{\text{back}, \text{middle}, \text{front}\} \quad \text{(zadaj, sredina,
 
 , kjer je $\boldsymbol{r}$ enotski vektor v desno smer, $\boldsymbol{u}$ enotski vektor navzgor in $w$ širina vagona.
 
-Ta pristop generira za vsako horizontalno ravnino predora (definirano z $y$ koordinato) natanko šest kritičnih točk, ki pokrivajo celotno širino in dolžino vagona. Sistematična razporeditev omogoča zanesljivo zaznavanje kršitev varnostnih razdalj ali položajev, kjer bi vagon bil zunaj dovoljenih mej predora.
+Ta pristop generira za vsako horizontalno ravnino predora (definirano z $y$ koordinato) natanko šest kritičnih točk, ki pokrivajo celotno širino in dolžino vagona. Sistematična razporeditev omogoča zanesljivo zaznavanje kršitev varnostnih razdalj ali položajev, kjer bi vagon bil zunaj dovoljenih mej predora. Na spodnji sliki je razvidno, kako so kritične točke razporejene po robovih vagona.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=11cm]{critical_points.png}
+    \caption{
+        Postavitev kritičnih točk na robovih vagona, ki po višini sovpadajo z B-zlepki sten predora.
+    }\label{fig:critical_points}
+\end{figure}
 
 
 
 \section{B-zlepki (B-splines)}
 \label{sec:b-zlepki}
 
-B-zlepki so parametrične krivulje, ki omogočajo gladko interpolacijo ali aproksimacijo množice točk. V svojem sistemu jih uporabljamo za reprezentacijo sten predora ter za modeliranje poti vagona.
+B-zlepki so parametrične krivulje, ki omogočajo gladko interpolacijo ali aproksimacijo množice točk. V svojem sistemu jih uporabljamo za reprezentacijo sten predora ter za modeliranje poti vagona. Na spodnji sliki je preprost primer interpolacije med točkami z njimi.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=11cm]{bspline.png}
+    \caption{
+        Primer interpolacije med točkami z B-zlepkom.
+    }\label{fig:bspline}
+\end{figure}
 
 \subsection{Matematične osnove B-zlepkov}
 \label{subsec:matematicne-osnove-b-zlepkov}
@@ -486,7 +527,16 @@ V vsaki poziciji vagona se izračunavajo pozicije kritičnih točk z uporabo ort
 
 Sistem razlikuje med dvema kategorijama kršitev: situacijami, kjer je del vagona zunaj fizičnih mej predora, in kršitvami varnostne razdalje, kjer je razdalja do stene manjša od predpisane varnostne meje.
 
-Ta pristop omogoča zgodnje opozarjanje pred potencialnimi trki in je posebej koristen pri dolgih kompozicijah, kjer se lahko kršitve razvijajo postopoma preko več pozicij. Celoten sistem je zasnovan za kontinuirano delovanje med simulacijo gibanja, kar omogoča analizo varnosti v realnem času.
+Ta pristop omogoča zgodnje opozarjanje pred potencialnimi trki in je posebej koristen pri dolgih kompozicijah, kjer se lahko kršitve razvijajo postopoma preko več pozicij. Celoten sistem je zasnovan za kontinuirano delovanje med simulacijo gibanja, kar omogoča analizo varnosti v realnem času. Na spodnji sliki je razvidno, kako se prikaže zaznan trk oziroma kršitev varnostne razdalje.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=11cm]{collision.png}
+    \caption{
+        Primer kršitve varnostne razdalje, ko se je vagon znašel preblizu stene.
+    }\label{fig:collision}
+\end{figure}
+
 
 \section{Analitične metode za optimizacijo prileganja}
 \label{sec:analiticne-metode-prileganja}
@@ -679,10 +729,112 @@ Sistem omogoča izvoz animacije v MP4 format z nastavljanjem parametra \texttt{e
 
 
 
+%----------------------------------------------------------------
+% Poglavje (Chapter) 6
+%----------------------------------------------------------------
+\chapter{Eksperimentalni postopki in rezultati}
+\label{ch:eksperimentalni-postopki}
+
+\section{Opis testnih predorov}
+\label{sec:opis-predorov}
+
+Testiranje je izvedeno na dveh predorih:
+\begin{itemize}
+    \item \textbf{Ringo}: dolžina 123 m, enostavna geometrija, vertikalni odmik tirnic 1800 mm, odmik središča predora 3700 mm.
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[width=9cm]{ringo.png}
+            \caption{
+                Prikaz ravne geometrije predora Ringo z B-zlepki sten.
+            }\label{fig:ringo}
+        \end{figure}
+    \item \textbf{Globoko}: dolžina 235 m, zahtevnejša geometrija, največja dovoljena višina vlaka 4900 mm, brez dodatnih poravnav.
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[width=9cm]{globoko.png}
+            \caption{
+                Prikaz ukrivljene geometrije predora Globoko z B-zlepki sten.
+            }\label{fig:globoko}
+        \end{figure}
+\end{itemize}
 
 
 
 
+
+\section{Glavni koraki poteka simulatorja}
+\label{sec:glavni-koraki}
+
+Za vsak predor najprej poiščemo največji možni vagon, ki ga lahko varno peljemo skozi, s postopkom brušenja. S tem se določi prilagojen 3D model vagona, ki maksimalno izkoristi prostor v predoru. Ko je ta model pripravljen, testiramo prileganje različnih tovorov nepravilnih oblik. Algoritem preveri, ali je mogoče izbrani tovor v kakšni orientaciji in položaju varno prepeljati skozi predor. Če je prileganje uspešno, se izpišejo parametri rotacije in translacije ter se rezultat vizualizira.
+
+\section{Načini delovanja simulatorja}
+\label{sec:nacini-simulatorja}
+
+Na voljo so štiri načini simulacije:
+\begin{itemize}
+    \item \textbf{Osnovna simulacija}: poljubne dimenzije vagona in varnostna razdalja. Uporablja se za preverjanje, ali vagon varno peljemo skozi predor.
+    \item \textbf{Merjenje omejitev}: povečan model vagona, brez varnostne razdalje. Rezultati se shranijo v JSON in uporabijo za generiranje prilagojenega modela.
+    \item \textbf{Prilagojen model}: simulacija z največjim možnim vagonom, ki ga določi analiza omejitev. Ta model je osnova za testiranje prileganja tovora.
+    \item \textbf{Vizualizacija STL}: simulacija s 3D modelom iz STL datoteke. Namenjena je testiranju vizualizacije.
+\end{itemize}
+
+Sistem omogoča tudi testiranje različnih geometrij prog z uporabo poljubnih matematičnih funkcij za generiranje kontrolnih točk.
+
+
+
+\section{Rezultati}
+\label{sec:rezultati}
+
+
+
+
+
+
+
+%----------------------------------------------------------------
+% Poglavje (Chapter) 7
+%----------------------------------------------------------------
+\chapter{Sklepne ugotovitve}
+\label{ch:sklepne-ugotovitve}
+
+\section{Povzetek prispevkov}
+\label{sec:povzetek-prispevkov}
+
+Magistrska naloga je prispevala k razvoju inovativnega sistema za zaznavanje trkov med vlakom in predorom z več ključnimi dosežki.
+
+Razvit je bil sistem za dinamično simulacijo gibanja vagona vzdolž ukrivljenih poti z uporabo analitičnega modeliranja medosne razdalje. Ta pristop presega omejitve statičnih metod minimalnih prerezov z realističnim modeliranjem orientacije vagona v prostoru.
+
+Implementirana je bila kombinacija obdelave oblakov točk z B-zlepki za reprezentacijo sten predora ter strategija kritičnih točk za učinkovito zaznavanje kršitev. Organizacija v horizontalne plasti omogoča obravnavo kompleksne 3D geometrije z zmanjšano računsko kompleksnostjo.
+
+Ključen prispevek predstavlja funkcionalnost analize varnostnih mej z generiranjem prilagojenih modelov vagona. Ta pristop omogoča optimalno izkoriščanje prostorskih zmogljivosti predora ter odpira možnosti za praktično uporabo v železniškem prometu. Prav tako je razvita funkcionalnost prileganja tovora, ki omogoča testiranje različnih oblik v prilagojenih modelih vagona. 
+
+Razvita je bila modularna arhitektura s fleksibilno konfiguracijo, ki omogoča prilagajanje različnim tipom predorov in vlakov. Implementirana vizualizacija z interaktivno 3D sceno omogoča intuitivno razumevanje rezultatov.
+
+\section{Omejitve pristopa}
+\label{sec:omejitve}
+
+Pristop ima več omejitev, ki vplivajo na njegovo uporabnost v različnih scenarijih.
+
+Geometrijski model vagona je omejen na pravokotno telo, kar ne ustreza vsem tipom železniških vozil. Kompleksnejši tovori z nepravilnimi oblikami zahtevajo naprednejše modeliranje ali uporabo 3D modelov iz datotek STL.
+
+Sistem je odvisen od kakovosti vhodnih podatkov oblaka točk predora. Šumni ali nepopolni podatki lahko vplivajo na natančnost B-zlepkov ter posledično na zanesljivost zaznavanja kršitev. Trenutna implementacija ne vključuje naprednih tehnik filtriranja šuma.
+
+Računska učinkovitost omejuje uporabo v aplikacijah realnega časa. Čeprav optimizacije zmanjšujejo čas obdelave, bi kontinuirano spremljanje gibanja vlaka zahtevalo dodatne izboljšave algoritmov.
+
+Pristop predpostavlja znane kontrolne točke, ki definirajo pot železniške proge. V scenarijih, kjer te niso na voljo ali so netočne, je potrebno dodatno delo za njihovo pridobitev ali aproksimacijo.
+
+\section{Predlogi za nadaljnje delo}
+\label{sec:predlogi-nadaljnje}
+
+Nadaljnji razvoj sistema lahko poteka v več smereh za izboljšanje funkcionalnosti in uporabnosti.
+
+Implementacija naprednejših geometrijskih modelov vlakov bi omogočila bolj natančno reprezentacijo različnih tipov železniških vozil. Integracija s CAD sistemi ali razvoj parametričnih modelov bi povečala fleksibilnost sistema.
+
+Raziskave na področju algoritmov strojnega učenja za obdelavo oblakov točk bi lahko izboljšale robustnost sistema pri šumnih podatkih. Nevronske mreže za segmentacijo in klasifikacijo bi omogočile avtomatsko identifikacijo različnih delov predora.
+
+Razvoj algoritmov za vzporedno obdelavo bi izboljšalo računsko učinkovitost. Uporaba GPU računanja ali distribuiranih sistemov bi omogočila obdelavo večjih oblakov točk v realnem času.
+
+Razširitev sistema na analizo celotnih kompozicij z več vagoni bi povečala praktično uporabnost. To vključuje modeliranje povezav med vagoni ter analizo dinamike dolgih kompozicij v ukrivljenih predorih.
 
 
 
