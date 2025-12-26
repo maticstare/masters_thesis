@@ -672,7 +672,7 @@ Sistem razlikuje med dvema tipoma kršitev: situacijami, kjer se del vagona naha
 
 Modul \texttt{collision\_margins\_to\_mesh.py} pretvori izmerjene varnostne razdalje iz JSON datoteke v 3D mrežni model. Postopek ustvari plasti točk na različnih višinah, kjer je vsaka plast sestavljena iz 6 točk (tri vzdolžne pozicije na obeh straneh vagona). Te točke se premikajo za izmerjene razdalje: desne točke premakne v levo, leve točke v desno.
 
-Mrežni model se konstruira s povezavanjem sosednjih plasti z bočnimi ploskvami ter zaključka s spodno in zgornjo ploskvijo. Rezultat se shrani v format VTK.
+Mrežni model se konstruira s povezovanjem sosednjih plasti z bočnimi ploskvami ter zaključka s spodnjo in zgornjo ploskvijo. Rezultat se shrani v format VTK.
 
 \subsection{FitCargo -- prileganje tovora}
 \label{subsec:fit-cargo}
@@ -735,10 +735,42 @@ Sistem omogoča izvoz animacije v MP4 format z nastavljanjem parametra \texttt{e
 \chapter{Eksperimentalni postopki in rezultati}
 \label{ch:eksperimentalni-postopki}
 
-\section{Opis testnih predorov}
-\label{sec:opis-predorov}
+\section{Glavni koraki poteka simulatorja}
+\label{sec:glavni-koraki}
 
-Testiranje je izvedeno na dveh predorih:
+Za vsak predor najprej poiščemo največji možni vagon, ki ga lahko varno peljemo skozi, s postopkom brušenja. S tem se določi prilagojen 3D model vagona, ki maksimalno izkoristi prostor v predoru. Ko je ta model pripravljen, testiramo prileganje različnih tovorov nepravilnih oblik. Algoritem preveri, ali je mogoče izbrani tovor v kakšni orientaciji in položaju varno prepeljati skozi predor. Če je prileganje uspešno, se izpišejo parametri rotacije in translacije ter se rezultat vizualizira.
+
+\section{Načini delovanja simulatorja}
+\label{sec:nacini-simulatorja}
+
+Na voljo so štiri načini simulacije:
+\begin{itemize}
+    \item \textbf{Osnovna simulacija}: poljubne dimenzije vagona in varnostna razdalja. Uporablja se za preverjanje, ali vagon varno peljemo skozi predor.
+    \item \textbf{Merjenje omejitev}: povečan model vagona, brez varnostne razdalje. Rezultati se shranijo v JSON in uporabijo za generiranje prilagojenega modela.
+    \item \textbf{Prilagojen model}: simulacija z največjim možnim vagonom, ki ga določi analiza omejitev. Ta model je osnova za testiranje prileganja tovora.
+    \item \textbf{Vizualizacija STL}: simulacija s 3D modelom iz datoteke STL. Namenjena je testiranju vizualizacije.
+\end{itemize}
+
+Sistem omogoča tudi testiranje različnih geometrij prog z uporabo poljubnih matematičnih funkcij za generiranje kontrolnih točk.
+
+
+
+\section{Rezultati}
+\label{sec:rezultati}
+
+V eksperimentalnem delu smo analizirali dva predora (Ringo, Globoko). Postopek vključuje:
+\begin{enumerate}
+    \item predobdelavo in transformacijo prerezov v 3D oblak točk,
+    \item generiranje horizontalnih plasti in B-zlepkov sten,
+    \item izračun varnostnih razdalj po višinskih nivojih,
+    \item generiranje prilagojenega obrušenega modela vagona,
+    \item prileganje dveh vrst tovora (enostavna zaboja in tovor v obliki jadra).
+\end{enumerate}
+
+
+\subsection{Predstavitev testnih predorov}
+\label{sec:predstavitev-predorov}
+
 \begin{itemize}
     \item \textbf{Ringo}: dolžina 123 m, enostavna geometrija, vertikalni odmik tirnic 1800 mm, odmik središča predora 3700 mm.
         \begin{figure}[h!]
@@ -759,36 +791,72 @@ Testiranje je izvedeno na dveh predorih:
 \end{itemize}
 
 
+\subsection{Predstavitev testnih tovorov}
 
-
-
-\section{Glavni koraki poteka simulatorja}
-\label{sec:glavni-koraki}
-
-Za vsak predor najprej poiščemo največji možni vagon, ki ga lahko varno peljemo skozi, s postopkom brušenja. S tem se določi prilagojen 3D model vagona, ki maksimalno izkoristi prostor v predoru. Ko je ta model pripravljen, testiramo prileganje različnih tovorov nepravilnih oblik. Algoritem preveri, ali je mogoče izbrani tovor v kakšni orientaciji in položaju varno prepeljati skozi predor. Če je prileganje uspešno, se izpišejo parametri rotacije in translacije ter se rezultat vizualizira.
-
-\section{Načini delovanja simulatorja}
-\label{sec:nacini-simulatorja}
-
-Na voljo so štiri načini simulacije:
 \begin{itemize}
-    \item \textbf{Osnovna simulacija}: poljubne dimenzije vagona in varnostna razdalja. Uporablja se za preverjanje, ali vagon varno peljemo skozi predor.
-    \item \textbf{Merjenje omejitev}: povečan model vagona, brez varnostne razdalje. Rezultati se shranijo v JSON in uporabijo za generiranje prilagojenega modela.
-    \item \textbf{Prilagojen model}: simulacija z največjim možnim vagonom, ki ga določi analiza omejitev. Ta model je osnova za testiranje prileganja tovora.
-    \item \textbf{Vizualizacija STL}: simulacija s 3D modelom iz STL datoteke. Namenjena je testiranju vizualizacije.
+    \item \textbf{Enostavna zaboja}: Tovor je sestavljen iz dveh zabojev, postavljenih eden na drugega.
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[width=9cm]{simple_cargo.png}
+            \caption{
+                Prikaz prvega testnega tovora v obliki enostavnih zabojev.
+            }\label{fig:simple_cargo}
+        \end{figure}
+    \item \textbf{Tovor v obliki jadra}: Tovor je v obliki jadrniškega jadra.
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[width=9cm]{sail_cargo.png}
+            \caption{
+                Prikaz drugega testnega tovora v obliki jadrniškega jadra.
+            }\label{fig:sail_cargo}
+        \end{figure}
 \end{itemize}
 
-Sistem omogoča tudi testiranje različnih geometrij prog z uporabo poljubnih matematičnih funkcij za generiranje kontrolnih točk.
+
+\subsection{Rezultati prileganja tovora}
+
+Najprej smo izvedli prileganje tovora v prilagojeni model vagona predora Ringo.
+
+\begin{itemize}
+    \item \textbf{Enostavna zaboja}: Tovor, ki je sestavljen iz dveh zabojev, postavljenih eden na drugega, se uspešno prilega znotraj prilagojenega modela z rotacijo yaw=0°, pitch=45° in roll=0°.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=9cm]{simple_ringo.png}
+            \caption{
+                Prikaz prileganja prvega testnega tovora v prilagojeni model predora Ringo.
+            }\label{fig:simple_ringo}
+        \end{figure}
+    \item \textbf{Tovor v obliki jadra}: Tovor, ki je v obliki jadrniškega jadra, se prav tako uspešno prilega znotraj prilagojenega modela z rotacijo yaw=0°, pitch=45° in roll=0°.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=9cm]{sail_ringo.png}
+            \caption{
+                Prikaz prileganja drugega testnega tovora v prilagojeni model predora Ringo.
+            }\label{fig:sail_ringo}
+        \end{figure}
+\end{itemize}
+
+Za tem smo izvedli tudi prileganje tovora v prilagojen model vagona predora Globoko.
 
 
-
-\section{Rezultati}
-\label{sec:rezultati}
-
-
-
-
-
+\begin{itemize}
+    \item \textbf{Enostavna zaboja}: Tovor, ki je sestavljen iz dveh zabojev, postavljenih eden na drugega, se v nobeni postavitvi ne prilega znotraj prilagojenega modela.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=9cm]{simple_globoko.png}
+            \caption{
+                Prikaz neuspešnega prileganja prvega testnega tovora v prilagojeni model predora Globoko.
+            }\label{fig:simple_globoko}
+        \end{figure}
+    \item \textbf{Tovor v obliki jadra}: Tovor, ki je v obliki jadrniškega jadra, pa se uspešno prilega znotraj prilagojenega modela z rotacijo yaw=0°, pitch=0° in roll=45°.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=9cm]{sail_globoko.png}
+            \caption{
+                Prikaz prileganja drugega testnega tovora v prilagojeni model predora Globoko.
+            }\label{fig:sail_globoko}
+        \end{figure}
+\end{itemize}
 
 
 %----------------------------------------------------------------
