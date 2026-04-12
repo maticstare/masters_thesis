@@ -9,10 +9,10 @@ xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/">
 </rdf:Description> 
 <rdf:Description rdf:about="" 
 xmlns:xap="http://ns.adobe.com/xap/1.0/"> 
-<xap:CreateDate>2025-12-26T13:19:38+01:00</xap:CreateDate> 
+<xap:CreateDate>2026-04-12T21:57:40+01:00</xap:CreateDate> 
 <xap:CreatorTool>TeX</xap:CreatorTool> 
-<xap:ModifyDate>2025-12-26T13:19:38+01:00</xap:ModifyDate> 
-<xap:MetadataDate>2025-12-26T13:19:38+01:00</xap:MetadataDate> 
+<xap:ModifyDate>2026-04-12T21:57:40+01:00</xap:ModifyDate> 
+<xap:MetadataDate>2026-04-12T21:57:40+01:00</xap:MetadataDate> 
 </rdf:Description> 
 <rdf:Description rdf:about="" 
 xmlns:pdfx="http://ns.adobe.com/pdfx/1.3/"> 
@@ -29,12 +29,12 @@ xmlns:dc="http://purl.org/dc/elements/1.1/">
 <dc:format>application/pdf</dc:format> 
 <dc:title> 
 <rdf:Alt> 
-<rdf:li xml:lang="x-default">Napovedovanje možnih trkov med vlaki in predori</rdf:li> 
+<rdf:li xml:lang="x-default">Napovedovanje trkov med vlaki in predori</rdf:li> 
 </rdf:Alt> 
 </dc:title> 
 <dc:description> 
 <rdf:Alt> 
-<rdf:li xml:lang="x-default">Predicting Possible Collisions Between Trains and Tunnels</rdf:li> 
+<rdf:li xml:lang="x-default">Predicting Collisions Between Trains and Tunnels</rdf:li> 
 </rdf:Alt> 
 </dc:description> 
 <dc:creator> 
@@ -44,7 +44,7 @@ xmlns:dc="http://purl.org/dc/elements/1.1/">
 </dc:creator> 
 <dc:subject> 
 <rdf:Bag> 
-<rdf:li>Predicting Possible Collisions Between Trains and Tunnels</rdf:li> 
+<rdf:li>Predicting Collisions Between Trains and Tunnels</rdf:li> 
 </rdf:Bag> 
 </dc:subject> 
 </rdf:Description> 
