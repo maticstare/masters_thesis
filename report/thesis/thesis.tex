@@ -534,7 +534,7 @@ Določi se središčna linija prereza kot referenčna os, nato se z vektorskim p
 \subsection{Izbira kritičnih točk}
 \label{subsec:izbira-kriticnih}
 
-Strategija zaznavanja trkov temelji na konceptu kritičnih točk, ki predstavljajo najverjetnejše lokacije za nastanek trkov. Pristop upošteva geometrijske lastnosti vagona za identifikacijo robnih točk z najvišjim tveganjem za trk ter dinamiko gibanja, kjer se različni deli vagona gibljejo po različnih poteh. Hkrati iščemo optimalen kompromis med natančnostjo in računsko učinkovitostjo.
+Strategija zaznavanja trkov temelji na konceptu kritičnih točk, ki predstavljajo najverjetnejše lokacije za nastanek trkov. Pristop upošteva geometrijske lastnosti vagona za identifikacijo robnih točk z najvišjim tveganjem za trk ter dinamiko gibanja, kjer se različni deli vagona gibljejo po različnih poteh. Pri tem iščemo optimalen kompromis med natančnostjo in računsko učinkovitostjo.
 
 Izbere se šest kritičnih točk~\eqref{eq:critical-points-wagon} na vsaki višini. Te točke pokrivajo tri vzdolžne pozicije (zadaj, sredina, spredaj) na obeh stranskih robovih vagona in zagotavljajo reprezentativnost za celotno strukturo vagona.
 
@@ -684,14 +684,14 @@ Metoda \texttt{\_calculate\_orthogonal\_coordinate\_system()} implementira pozic
 
 Izvedba uporablja SciPy funkciji \texttt{root\_scalar()} z metodo \texttt{bracket} za zanesljivo iskanje presečišča ter \texttt{minimize\_scalar()} v primerih, ko presečišče ni najdeno. Ta pristop zagotavlja, da je medosna razdalja natančno ohranjena tudi na ostrih ovinkih.
 
-Metoda \texttt{get\_vertices\_at\_position()} izračuna vseh osem vogalov vagona z uporabo ortogonalnega koordinatnega sistema~\eqref{eq:wagon-frame}. Vogali se določijo na osnovi dejanskih mej vagona, ki upoštevajo parameter \texttt{wheel\_offset} za pozicioniranje osi koles.
+Metoda \texttt{update\_position()} izračuna vseh osem vogalov vagona z uporabo ortogonalnega koordinatnega sistema~\eqref{eq:wagon-frame}. Vogali se določijo na osnovi dejanskih mej vagona, ki upoštevajo parameter \texttt{wheel\_offset} za pozicioniranje osi koles.
 
 \subsection{CollisionDetector -- zaznavanje trkov}
 \label{subsec:collision-detector}
 
 Razred \texttt{CollisionDetector} implementira sistem za zaznavanje kršitev varnostnih razdalj med vagnom in stenami predora. Uporablja strategijo kritičnih točk~\eqref{eq:critical-points-wagon}.
 
-Metoda \texttt{get\_wagon\_points()} generira šest kritičnih točk vagona na določeni višini: tri vzdolžne pozicije (zadaj, sredina, spredaj) na obeh stranskih robovih. Te točke predstavljajo najverjetnejše lokacije za nastanek trkov.
+Metoda \texttt{get\_bounding\_box\_points()} generira šest kritičnih točk vagona na določeni višini: tri vzdolžne pozicije (zadaj, sredina, spredaj) na obeh stranskih robovih. Te točke predstavljajo najverjetnejše lokacije za nastanek trkov.
 
 Glavna metoda \texttt{check\_collision()} izvaja sistematično preverjanje vseh kritičnih točk za vse horizontalne plasti predora. Za vsako kritično točko se določi najbližja pozicija na ustrezni steni z metodo \texttt{find\_closest\_point\_on\_curve()}, ki implementira iskanje najbližje točke na B-zlepku ter določanje strani z vektorskim produktom.
 
@@ -947,9 +947,11 @@ Geometrijski model vagona je omejen na kvader, kar ne ustreza vsem tipom železn
 
 Sistem je odvisen od kakovosti vhodnih podatkov oblaka točk predora. Šumni ali nepopolni podatki lahko vplivajo na natančnost B-zlepkov ter posledično na zanesljivost zaznavanja kršitev. Trenutna implementacija ne vključuje naprednih tehnik filtriranja šuma.
 
-Računska učinkovitost omejuje uporabo v aplikacijah realnega časa. Čeprav optimizacije zmanjšujejo čas obdelave, bi kontinuirano spremljanje gibanja vlaka zahtevalo dodatne izboljšave algoritmov.
+Čeprav časi obdelave naraščajo linearno s številom plasti in dolžino predora, bi obdelava zelo dolgih predorov ali zelo velikega števila plasti zahtevala dodatne optimizacije.
 
 Pristop predpostavlja znane kontrolne točke, ki definirajo pot železniške proge. V scenarijih, kjer te niso na voljo ali so netočne, je potrebno dodatno delo za njihovo pridobitev ali aproksimacijo.
+
+Sistem je bil preizkušen le na dveh predorih, ki smo jih pridobili od Slovenskih železnic, kar omejuje splošnost eksperimentalnih ugotovitev.
 
 \section{Predlogi za nadaljnje delo}
 \label{sec:predlogi-nadaljnje}
