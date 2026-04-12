@@ -1,0 +1,8 @@
+pyvista==0.45.2
+numpy==1.26.0
+scipy==1.11.4
+trimesh==4.7.4
+pandas==2.1.4
+svgpathtools==1.7.1
+matplotlib==3.8.0
+opencv-python==4.9.0.80
