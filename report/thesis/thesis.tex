@@ -79,7 +79,7 @@
 \newcommand{\tsubjectEn}{\ttitleEn}
 \newcommand{\tauthor}{Matic Stare}
 \newcommand{\temail}{ms79450@student.uni-lj.si}
-\newcommand{\myyear}{2025}
+\newcommand{\myyear}{2026}
 \newcommand{\tkeywords}{računalniška geometrija, železniški promet, zaznavanje trkov, oblaki točk, B-zlepki, brušenje vagona, 3D vizualizacija, optimizacija}
 \newcommand{\tkeywordsEn}{computer geometry, rail transport, collision detection, point clouds, B-splines, wagon shaving off, 3D visualization, optimization}
 \newcommand{\mysupervisor}{doc.~dr.\ Uroš Čibej}
@@ -769,7 +769,7 @@ Med možnimi alternativami smo razmišljali o uporabi linearnega povezovanja to�
 \chapter{Eksperimentalni postopki in rezultati}
 \label{ch:eksperimentalni-postopki}
 
-V tem poglavju predstavimo eksperimentalno ovrednotenje razvitega sistema. Najprej opišemo glavne korake poteka simulatorja in načine delovanja, nato pa predstavimo rezultate analize dveh testnih predorov ter prileganja tovorov različnih oblik.
+V tem poglavju predstavimo eksperimentalno ovrednotenje razvitega sistema. Najprej opišemo glavne korake poteka simulatorja in načine delovanja, nato pa predstavimo rezultate analize dveh testnih predorov ter prileganja tovorov različnih oblik. Poglavje zaključimo z analizo zmogljivosti simulatorja.
 
 \section{Glavni koraki poteka simulatorja}
 \label{sec:glavni-koraki}
@@ -872,6 +872,51 @@ V predoru Globoko se enostavna zaboja v nobeni orientaciji ne prilega v prilagoj
         Prileganje tovora v prilagojeni model predora Globoko: neuspešno prileganje enostavne zaboje (levo) in uspešno prileganje tovora v obliki jadra (desno).
     }\label{fig:fitting_globoko}
 \end{figure}
+
+
+\subsection{Analiza zmogljivosti simulatorja}
+
+Za oceno zmogljivosti sistema smo izmerili čas izvajanja glavnih korakov za oba predora pri različnem številu horizontalnih plasti. Meritve so bile izvedene na računalniku s procesorjem AMD Ryzen 7 5800X3D in 32 GB delovnega pomnilnika. Lastnosti testnih predorov so povzete v Tabeli~\ref{tab:tunnel-stats}, časi izvajanja pa v Tabeli~\ref{tab:benchmark}.
+
+\begin{table}[H]
+\centering
+\caption{Lastnosti testnih predorov.}
+\label{tab:tunnel-stats}
+\begin{tabular}{lrr}
+\toprule
+& \textbf{Ringo} & \textbf{Globoko} \\
+\midrule
+Dolžina predora [m] & 123 & 235 \\
+Število prečnih prerezov & 248 & 472 \\
+Število točk v oblaku & 1.139.889 & 2.243.607 \\
+Število simulacijskih korakov & 226 & 451 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Časi izvajanja [s] za oba predora, kjer $n$ označuje število horizontalnih plasti.}
+\label{tab:benchmark}
+\begin{tabular}{lrrr}
+\toprule
+& $n$ & \textbf{Ringo [s]} & \textbf{Globoko [s]} \\
+\midrule
+Nalaganje podatkov & & 0,51 & 1,58 \\
+\midrule
+\multirow{4}{*}{Obdelava predora} & 10 & 1,10 & 3,17 \\
+& 25 & 2,66 & 7,39 \\
+& 50 & 4,90 & 14,57 \\
+& 200 & 19,81 & 59,00 \\
+\midrule
+Simulacija & 25 & 8,68 & 17,52 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Iz rezultatov je razvidno, da čas obdelave predora narašča približno linearno s številom horizontalnih plasti $n$. Prav tako narašča linearno z dolžino predora: Globoko je skoraj dvakrat daljši od predora Ringo, časi pa so približno 2,5-krat daljši. Enako velja za simulacijo, kjer dvakrat več korakov podvoji čas izvajanja. Nalaganje podatkov iz predpomnjenega formata Parquet predstavlja le manjši delež celotnega časa.
+
+Od Slovenskih železnic smo uspeli pridobiti podatke za le dva omenjena predora, zato je bila analiza bolj omejena. Čeprav sistem podpira tudi generiranje umetnih kontrolnih točk s poljubnimi krivuljnimi funkcijami, smo se osredotočili izključno na realne podatke, saj gre za praktičen problem iz železniškega prometa. Širša evalvacija na več predorih z raznolikimi geometrijami bi dodatno potrdila splošnost pristopa.
 
 
 %----------------------------------------------------------------
