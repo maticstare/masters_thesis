@@ -76,6 +76,18 @@
 % SLO: razmik med vrsticami
 % ENG: line spacing
 \renewcommand{\baselinestretch}{1.3}
+% SLO: dovoli prelom vrstice za podčrtajem znotraj \texttt, da se dolgi identifikatorji ne razširjajo čez rob
+% ENG: allow line breaks after underscores inside \texttt so long snake_case identifiers don't overflow
+\makeatletter
+\let\orig@texttt\texttt
+\let\orig@underscore\_
+\renewcommand{\texttt}[1]{%
+  \begingroup
+  \renewcommand{\_}{\orig@underscore\allowbreak}%
+  \orig@texttt{#1}%
+  \endgroup
+}
+\makeatother
 % SLO: postavitev strani
 % ENG: page layout
 \renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{\thechapter.\ #1}}{}}
