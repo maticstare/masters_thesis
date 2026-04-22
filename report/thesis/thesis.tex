@@ -140,11 +140,11 @@ Naloga se umešča na področje računalniškega modeliranja in analize prostora
 
 Magistrska naloga bo prispevala k razvoju sistema za zaznavanje trkov med vlakom in predorom s simulacijo gibanja vagona. V primerjavi z obstoječimi metodami, ki temeljijo na statični analizi minimalnih prerezov, predlagana rešitev omogoča dinamično simulacijo gibanja in neprekinjeno preverjanje varnostnih razdalj.
 
-Novost naloge je v integraciji obdelave oblakov točk predora z analitičnim modeliranjem gibanja vagona vzdolž ukrivljene poti ter implementaciji sistema za zaznavanje trkov. Glavni prispevki magistrske naloge so:
+Novost naloge je v integraciji obdelave oblakov točk predora z analitičnim modeliranjem gibanja vagona vzdolž ukrivljene poti ter razvoju sistema za zaznavanje trkov. Glavni prispevki magistrske naloge so:
 
 \begin{itemize}
 \item razvoj sistema za obdelavo oblakov točk predora z B-zlepki za reprezentacijo sten,
-\item implementacija simulacije gibanja vagona vzdolž kontrolnih točk v ortogonalnem koordinatnem sistemu,
+\item razvoj simulacije gibanja vagona vzdolž kontrolnih točk v ortogonalnem koordinatnem sistemu,
 \item sistem za zaznavanje trkov z analizo razdalj med kritičnimi točkami vagona in stenami predora,
 \item generiranje največjega dopustnega modela vagona za varen prehod skozi predor,
 \item algoritem za prileganje tovora različnih oblik v prilagojen model vagona,
@@ -546,7 +546,7 @@ Postopek preverjanja kršitev določa sistematičen način zaznavanja situacij, 
 
 V vsakem položaju vagona izračunamo položaje kritičnih točk z uporabo ortogonalnega koordinatnega sistema~\eqref{eq:wagon-frame}. Za vsako kritično točko določimo najbližje položaje na stenah predora ter izračunamo razdalje in orientacijo glede na stene z metodami iz poglavja~\ref{sec:metode-razdalj}. Izračunane razdalje sistematično primerjamo z varnostnimi mejami, zaznane kršitve pa beležimo in kategoriziramo.
 
-Sistem razlikuje med dvema vrstama kršitev: situacijami, ko je del vagona zunaj fizičnih mej predora, in kršitvami varnostne razdalje, ko je razdalja do stene manjša od predpisane varnostne meje.
+Sistem razlikuje med dvema vrstama kršitev, in sicer med situacijami, ko je del vagona zunaj fizičnih mej predora, in kršitvami varnostne razdalje, ko je razdalja do stene manjša od predpisane varnostne meje.
 
 Ta postopek omogoča zgodnje opozarjanje na potencialne trke in je posebej koristen pri dolgih kompozicijah, kjer se kršitve lahko razvijajo postopoma skozi več položajev. Celoten sistem je zasnovan za neprekinjeno delovanje med simulacijo gibanja, kar omogoča sprotno analizo varnosti. Primer zaznanega trka oziroma kršitve varnostne razdalje prikazuje slika~\ref{fig:collision}.
 
@@ -660,9 +660,9 @@ Modul \texttt{excel\_parser.py} implementira funkcije za branje in transformacij
 
 Funkcija \texttt{parse\_excel\_to\_points\_dict()} bere Excelovo datoteko in organizira podatke v slovar, kjer ključi predstavljajo razdalje vzdolž poti, vrednosti pa koordinate X, Y, Z za vsak presek. Dvodimenzionalne koordinate dopolnimo z Z koordinato, izračunano iz položaja vzdolž poti, pomnoženega s faktorjem \texttt{space\_out\_factor} za normalizacijo razdalj našega modela.
 
-Za optimizacijo hitrosti nalaganja implementiramo \texttt{efficient\_data\_loading()}, ki uporablja format Parquet za shranjevanje obdelanih podatkov. Ob prvem branju Excelovo datoteko pretvorimo in shranimo v Parquet, pri naslednjih uporabah pa podatke naložimo neposredno iz Parquet datoteke, kar znatno skrajša trajanje nalaganja.
+Za optimizacijo hitrosti nalaganja razvijemo \texttt{efficient\_data\_loading()}, ki uporablja format Parquet za shranjevanje obdelanih podatkov. Ob prvem branju Excelovo datoteko pretvorimo in shranimo v Parquet, pri naslednjih uporabah pa podatke naložimo neposredno iz Parquet datoteke, kar znatno skrajša trajanje nalaganja.
 
-Dodatno implementiramo funkcionalnost \texttt{prepare\_control\_points()}, ki omogoča generiranje ali branje kontrolnih točk iz datoteke. Če kontrolne točke obstajajo v predpomnilni datoteki, jih naložimo iz \texttt{control\_points.txt}, sicer jih generiramo iz podatkov predora.
+Dodatno razvijemo funkcijo \texttt{prepare\_control\_points()}, ki omogoča generiranje ali branje kontrolnih točk iz datoteke. Če kontrolne točke obstajajo v predpomnilni datoteki, jih naložimo iz \texttt{control\_points.txt}, sicer jih generiramo iz podatkov predora.
 
 \subsection{TunnelSlicer - obdelava geometrije}
 \label{subsec:tunnel-slicer}
@@ -673,7 +673,7 @@ Ključna metoda \texttt{\_curve\_points()} izvaja transformacijo koordinatnega s
 
 Metoda \texttt{\_generate\_splines\_at\_y\_values()} organizira oblak točk v horizontalne prereze na različnih višinskih nivojih. Za vsak nivo točke razvrstimo na levo in desno steno z uporabo funkcije \texttt{\_classify\_based\_on\_b\_spline()}, ki implementira teorijo določanja strani iz poglavja~\ref{subsec:dolocanje-strani}. Iz razvrščenih točk nato generiramo B-zlepke z uporabo SciPy funkcij \texttt{splprep()} in \texttt{splev()}.
 
-Za večjo učinkovitost implementiramo predpomnjenje transformiranih podatkov v formatu Parquet. Metodi \texttt{save\_to\_parquet()} in \texttt{load\_from\_parquet()} omogočata shranjevanje in branje obdelanega oblaka točk, kar preprečuje ponovne izračune pri večkratnih zaganjanjih sistema.
+Za večjo učinkovitost uvedemo predpomnjenje transformiranih podatkov v formatu Parquet. Metodi \texttt{save\_to\_parquet()} in \texttt{load\_from\_parquet()} omogočata shranjevanje in branje obdelanega oblaka točk, kar preprečuje ponovne izračune pri večkratnih zaganjanjih sistema.
 
 \subsection{Wagon - modeliranje vagona}
 \label{subsec:wagon-model}
@@ -732,7 +732,7 @@ Podprti so štirje načini simulacije: osnovna analiza s standardnimi dimenzijam
 \subsection{Izvedba B-zlepkov s SciPy}
 \label{subsec:implementacija-b-zlepkov}
 
-B-zlepke implementiramo z uporabo knjižnice SciPy, natančneje funkcij \texttt{splprep()} in \texttt{splev()}. Funkcija \texttt{splprep()} sprejme niz kontrolnih točk in generira parametrični B-zlepek s stopnjo gladkosti \texttt{s=0} za interpolacijo skozi vse točke. Parameter \texttt{k} določa stopnjo zlepka, privzeto nastavljeno na 3 za kubične zlepke.
+B-zlepke izračunamo z uporabo knjižnice SciPy, natančneje funkcij \texttt{splprep()} in \texttt{splev()}. Funkcija \texttt{splprep()} sprejme niz kontrolnih točk in generira parametrični B-zlepek s stopnjo gladkosti \texttt{s=0} za interpolacijo skozi vse točke. Parameter \texttt{k} določa stopnjo zlepka, privzeto nastavljeno na 3 za kubične zlepke.
 
 Za predstavitev sten predora B-zlepke uporabljamo v 2D prostoru (koordinati X in Z), saj obdelavo izvajamo po horizontalnih plasteh. Koordinata Y ostane konstantna za vsako plast. Ta postopek omogoča učinkovito obdelavo kompleksne 3D geometrije kot zaporedje 2D problemov.
 
@@ -750,7 +750,7 @@ Sistem uporablja knjižnico PyVista za 3D vizualizacijo in animacijo simulacije.
 
 Glavna vizualizacija poteka prek objekta \texttt{pv.Plotter()}, ki omogoča interaktivno 3D sceno. Oblak točk predora prikažemo z metodo \texttt{add\_points()}, B-zlepke sten pa z \texttt{add\_mesh()} za polilinijske objekte. Vagon predstavimo kot kvader z \texttt{pv.Cube()}.
 
-Za zaznavanje kršitev implementiramo vizualno povratno informacijo z barvnimi črtami med kritičnimi točkami vagona in najbližjimi stenami. Oranžne črte označujejo situacije zunaj predora, rumene pa kršitve varnostne razdalje. Dodane so tudi besedilne oznake z informacijami o razdalji in tipu kršitve.
+Zaznane kršitve prikažemo z barvnimi črtami med kritičnimi točkami vagona in najbližjimi točkami na stenah predora. Oranžne črte označujejo situacije zunaj predora, rumene pa kršitve varnostne razdalje. Dodane so tudi besedilne oznake z informacijami o razdalji in tipu kršitve.
 
 Sistem omogoča izvoz animacije v format MP4 z nastavitvijo parametra \texttt{export\_mp4=True}, kar je uporabno za dokumentacijo rezultatov in predstavitve.
 
@@ -855,7 +855,7 @@ V predoru Ringo se oba tovora uspešno prilegata prilagojenemu modelu vagona, ka
  \hfill
  \includegraphics[width=0.48\textwidth]{sail_ringo.png}
  \caption{
-    Prileganje tovora v prilagojen model vagona za predor Ringo: enostavna zaboja (levo) in tovor v obliki jadra (desno).
+    Prileganje tovora v prilagojeni model vagona za predor Ringo: enostavna zaboja (levo) in tovor v obliki jadra (desno).
  }\label{fig:fitting_ringo}
 \end{figure}
 
@@ -867,7 +867,7 @@ V predoru Globoko se enostavna zaboja v nobeni orientaciji ne prilegata prilagoj
  \hfill
  \includegraphics[width=0.48\textwidth]{sail_globoko.png}
  \caption{
-    Prileganje tovora v prilagojen model vagona za predor Globoko: neuspešno prileganje enostavne zaboje (levo) in uspešno prileganje tovora v obliki jadra (desno).
+    Prileganje tovora v prilagojeni model vagona za predor Globoko: neuspešno prileganje enostavne zaboje (levo) in uspešno prileganje tovora v obliki jadra (desno).
  }\label{fig:fitting_globoko}
 \end{figure}
 
@@ -912,7 +912,7 @@ Simulacija & 25 & 8,68 & 17,52 \\
 \end{tabular}
 \end{table}
 
-Iz rezultatov je razvidno, da trajanje obdelave predora narašča približno linearno s številom horizontalnih plasti $n$. Prav tako narašča linearno z dolžino predora: Globoko je skoraj dvakrat daljši od predora Ringo, trajanja pa so približno 2,5-krat daljša. Enako velja za simulacijo, kjer dvakrat več korakov podvoji trajanje izvajanja. Nalaganje podatkov iz predpomnjenega formata Parquet predstavlja le manjši delež celotnega trajanja simulacije.
+Iz rezultatov je razvidno, da trajanje obdelave posameznega predora narašča približno linearno s številom horizontalnih plasti $n$ in z dolžino predora. Predor Globoko je približno dvakrat daljši od predora Ringo, trajanje simulacije pa je za predor Globoko približno 2,5-krat daljše kot za predor Ringo. Enako velja za simulacijo, kjer dvakrat več korakov podvoji trajanje izvajanja. Nalaganje podatkov iz predpomnjenega formata Parquet predstavlja le manjši delež celotnega trajanja simulacije.
 
 Od Slovenskih železnic smo pridobili podatke le za omenjena predora, zato je bila analiza omejena. Čeprav sistem podpira tudi generiranje umetnih kontrolnih točk s poljubnimi krivuljnimi funkcijami, smo se osredotočili izključno na realne podatke, saj gre za praktičen problem železniškega prometa. Širša evalvacija na več predorih z raznolikimi geometrijami bi dodatno potrdila veljavnost predlagane metodologije.
 
@@ -930,11 +930,11 @@ Magistrska naloga prispeva k razvoju inovativnega sistema za zaznavanje trkov me
 
 Razvili smo sistem za dinamično simulacijo gibanja vagona vzdolž ukrivljenih poti z uporabo analitičnega modeliranja medosne razdalje. Ta metoda presega omejitve statičnih metod minimalnih prerezov z realističnim modeliranjem orientacije vagona v prostoru.
 
-Implementirali smo kombinacijo obdelave oblakov točk z B-zlepki za reprezentacijo sten predora in metodo kritičnih točk za učinkovito zaznavanje kršitev. Organizacija v horizontalne plasti omogoča obravnavo kompleksne 3D geometrije ob zmanjšani računski zahtevnosti.
+Razvili smo kombinacijo obdelave oblakov točk z B-zlepki za reprezentacijo sten predora in metodo kritičnih točk za učinkovito zaznavanje kršitev. Organizacija v horizontalne plasti omogoča obravnavo kompleksne 3D geometrije ob zmanjšani računski zahtevnosti.
 
 Ključen prispevek je analiza varnostnih mej z generiranjem prilagojenih modelov. Ta metoda omogoča optimalno izkoriščanje prostorskih zmogljivosti predora in odpira možnosti za praktično uporabo v železniškem prometu. Razvili smo tudi funkcionalnost prileganja tovora, ki omogoča testiranje različnih oblik v prilagojenih modelih.
 
-Uporabili smo modularno arhitekturo s prilagodljivo konfiguracijo, ki omogoča prilagajanje različnim vrstam predorov in vlakov. Implementirana vizualizacija z interaktivno 3D sceno omogoča intuitivno razumevanje rezultatov.
+Uporabili smo modularno arhitekturo s prilagodljivo konfiguracijo, ki omogoča prilagajanje različnim vrstam predorov in vlakov. Razvita vizualizacija z interaktivno 3D sceno omogoča intuitivno razumevanje rezultatov.
 
 \section{Omejitve rešitve}
 \label{sec:omejitve}
