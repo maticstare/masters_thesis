@@ -1,10 +1,6 @@
 # Train-Tunnel Collision Detection System
 
-A Python system that detects potential collisions between trains and tunnel walls using 3D point cloud processing and real-time simulation.
-
-## Overview
-
-This system processes tunnel data from 3D laser scans and simulates train movement to detect safety violations before they occur. Developed for Slovenske železnice (Slovenian Railways).
+A Python system that predicts collisions between rail wagons and tunnel walls using 3D point cloud processing and parametric simulation — including in curved tunnels where static cross-section checks fail. Developed for Slovenske železnice (Slovenian Railways).
 
 ## Demo
 
@@ -12,74 +8,44 @@ This system processes tunnel data from 3D laser scans and simulates train moveme
 
 ## Features
 
-- 🚂 **Train Simulation**: Realistic wagon movement along curved paths
-- 🏔️ **Tunnel Processing**: Convert 2D tunnel cross-sections to 3D geometry
-- ⚠️ **Collision Detection**: Real-time safety violation detection
-- 📊 **Visualization**: Interactive 3D simulation with PyVista
-- 🎯 **Safety Analysis**: Configurable safety margins and violation types
+- 🚂 **Dynamic collision detection** — six critical points per wagon layer, curved-tunnel aware
+- 📐 **Tunnel reconstruction** — 2D cross-sections lifted into 3D via Rodrigues rotation
+- 🪚 **Largest safe wagon** — iterative shaving of an oversized wagon to fit a given tunnel
+- 📦 **Cargo fitting** — Euler-angle search to fit arbitrary cargo into the shaved wagon
+- 🎥 **3D visualization** — interactive PyVista scene, optional MP4 export
 
 ## Quick Start
 
-### Install Dependencies
-
 ```bash
-pip install numpy pandas scipy pyvista openpyxl pyarrow
-```
-
-### Run Simulation
-
-```python
+pip install -r requirements.txt
 python main.py
 ```
 
-### Configure Tunnel
-
-Edit `main.py` to select tunnel:
+Edit [main.py](main.py) to pick the tunnel and mode:
 
 ```python
-tunnel = "globoko"  # or "ringo"
+tunnel = "ringo"   # or "globoko"
+mode = 0           # see table below
 ```
 
-## How It Works
+| Mode | Purpose |
+|---|---|
+| `normal` | Run wagon through tunnel with safety margin; flag violations |
+| `calculating_collision_margins` | Record per-layer wall penetrations to `collision_margins.json` |
+| `shaved_off_model` | Run with the previously generated `shaved_off_wagon_model.vtk` |
+| `train_model` | Run with an arbitrary STL train mesh |
 
-1. **Load tunnel data** from Excel files (2D cross-sections)
-2. **Transform to 3D** using control points and curve fitting
-3. **Generate B-splines** for smooth tunnel wall representation
-4. **Simulate train movement** with accurate wagon geometry
-5. **Check collisions** using 6 critical points per wagon height
-6. **Visualize results** with real-time 3D graphics
+Other entry points:
 
-## Project Structure
-
+```bash
+python collision_margins_to_mesh.py   # margins JSON → shaved_off_wagon_model.vtk
+python fit_cargo.py                   # try fitting example cargo into shaved models
 ```
-masters_thesis/
-├── main.py                 # Run this to start
-├── simulation.py           # Main simulation controller
-├── collision_detector.py   # Collision detection logic
-├── train_generator.py      # Train/wagon modeling
-├── tunnel_slicer.py        # Tunnel geometry processing
-├── data/                   # Tunnel data files
-└── videos/                 # Output animations
-```
-
-## Output
-
-- **Interactive 3D view** of tunnel, train, and collision points
-- **Collision reports** with distance measurements
-- **Safety violations** highlighted in orange/yellow
-- **Optional MP4 export** for documentation
-
-## Collision Types
-
-- 🔴 **Outside Tunnel**: Train extends beyond tunnel boundaries
-- 🟡 **Too Close**: Distance less than safety margin
 
 ## Author
 
-**Matic Stare** - University of Ljubljana
-📧 ms79450@student.uni-lj.si
-👨‍🏫 Supervisor: doc. dr. Uroš Čibej
-
-## License
-
-Master's thesis project - University of Ljubljana, Faculty of Computer and Information Science
+**Matic Stare**  
+University of Ljubljana, Faculty of Computer and Information Science  
+📧 ms79450@student.uni-lj.si  
+👨‍🏫 Supervisor: doc. dr. Uroš Čibej  
+Master's thesis, 2026
