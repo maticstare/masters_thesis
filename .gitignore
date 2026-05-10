@@ -11,3 +11,7 @@ data/globoko/globoko_old
 /report/dispozicija/dispozicija1.tex
 /report/dispozicija2025/
 report/thesis_old/
+report/presentation/*
+!report/presentation/presentation.pdf
+!report/presentation/presentation.tex
+!report/presentation/script.md
