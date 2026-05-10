@@ -6,6 +6,10 @@ A Python system that detects potential collisions between trains and tunnel wall
 
 This system processes tunnel data from 3D laser scans and simulates train movement to detect safety violations before they occur. Developed for Slovenske železnice (Slovenian Railways).
 
+## Demo
+
+[demo](https://github.com/user-attachments/assets/aec65d15-5602-41ec-bd91-1eff6ea842b2)
+
 ## Features
 
 - 🚂 **Train Simulation**: Realistic wagon movement along curved paths
